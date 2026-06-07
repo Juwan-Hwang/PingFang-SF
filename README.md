@@ -117,6 +117,41 @@ Source Han Sans 使用 CFF 轮廓格式，苹方使用 TrueType 轮廓。合并�
 font-family: "PingFang SF", "PingFang SC", sans-serif;
 ```
 
+## 工具脚本
+
+### `merge_arabic_gsub.py` — 阿拉伯文 GSUB 合并工具
+
+解决社区常见问题：**合并阿拉伯文字体后字母不连写**。
+
+```bash
+# 用法
+python merge_arabic_gsub.py --target TARGET.ttf --source SOURCE.ttf [--output OUTPUT.ttf]
+```
+
+核心原理：
+1. 通过 Unicode 码位建立源→目标字形名映射（不依赖字形名格式）
+2. 从源字体提取 `init/medi/fina/isol/rlig` 替换规则
+3. **从头构建 GSUB 表**（不深拷贝，避免 fontTools 编译缓存导致修改不生效）
+4. 自动修复复合字形组件引用缺失
+5. 内置 gvar lazy loading 修复和 HarfBuzz shaping 验证
+
+解决的技术陷阱：
+- fontTools `pf.save()` 不重编译已修改的 GSUB（`dirty=True` 不可靠）
+- gvar 表 `glyphCount` 与实际字形数不匹配导致 `AssertionError`
+- 复合字形 `expand()` 后组件丢失导致空字形
+- `recalcBounds` 递归死循环
+
+### `extract_apple_fonts.sh` — Apple DMG 字体提取
+
+从 Apple 的 `.dmg` 字体包中提取 OTF/TTF 文件（参考 [AUR apple-fonts](https://aur.archlinux.org/packages/apple-fonts) 的 PKGBUILD）：
+
+```bash
+7z e font.dmg -y -otmp/
+cd tmp/ && 7z x -txar *.pkg -y
+cd *.pkg/ && 7z x Payload -y && 7z x Payload~ -y
+# 字体在 Library/Fonts/ 中
+```
+
 ## 依赖工具
 
 - [fontTools](https://github.com/fonttools/fonttools) — 字体读写、合并、子集化、UPEM 缩放
