@@ -102,13 +102,6 @@ Source Han Sans 使用 CFF 轮廓格式，苹方使用 TrueType 轮廓。合并�
 
 ## 命名规则
 
-文件名 `PingFang_UI_TC_HK_SC_Medium.ttf` 表示：
-- **TC** — 底本为繁体中文
-- **HK** — 补充了 HK 独有字符
-- **SC** — 补充了 SC 独有字符并替换了标点
-
-如后续再添加其他字体（如 JP），命名追加为 `TC_HK_SC_JP_Medium.ttf`。
-
 安装后的字体名为 **PingFang SF** / **苹方SF**，不会与系统原版苹方冲突。
 
 ## CSS 引用
