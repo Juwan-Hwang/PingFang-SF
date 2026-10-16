@@ -34,7 +34,23 @@ https://github.com/user-attachments/assets/a2d30dc7-78d6-407a-9442-e9c643997dc7
 
 ## 下载
 
-到 [Releases](https://github.com/Juwan-Hwang/PingFang-SF/releases/latest) 下载最新的 `PingFang-SF-Medium.ttf`（约 63 MB，与仓库中的 `PingFang-SF Medium.ttf` 相同）。
+当前版本 **v1.1.1**：[直接下载 `PingFang-SF-Medium.ttf`](https://github.com/Juwan-Hwang/PingFang-SF/releases/download/v1.1.1/PingFang-SF-Medium.ttf)（约 63 MB，与仓库中的 `PingFang-SF Medium.ttf` 相同），或到 [Releases](https://github.com/Juwan-Hwang/PingFang-SF/releases/latest) 查看说明与 SHA-256。
+
+### 校验来源
+
+每个 Release 的字体都由 GitHub Actions 生成来源认证（artifact attestation），版本标签由作者用硬件密钥签名。下载后可用 GitHub CLI 验证文件确实来自本仓库：
+
+```bash
+gh attestation verify PingFang-SF-Medium.ttf -R Juwan-Hwang/PingFang-SF
+```
+
+字体本身还带有 OpenType 数字签名（DSIG 表，Authenticode / PKCS#7，SHA-1 摘要 + DigiCert 时间戳），由作者的 YubiKey 硬件密钥签署。签名证书为自签证书，公钥见 [`signing/PingFang-SF-signing-cert.cer`](signing/PingFang-SF-signing-cert.cer)：
+
+- 主体：`CN=Juwan Hwang, O=PingFang SF Project`
+- SHA-1 指纹：`4959BD61D927497F28941DB3454E921FD3E9D969`
+- SHA-256 指纹：`fa85f6c6d0d007696d64f2dd7a15060c5cfadc3d4632961b9fd6a1d755ffb73f`
+
+Windows 上可用 `signtool verify /pa /v PingFang-SF-Medium.ttf` 查看签名；因证书为自签，会提示根证书不受信任，核对上面的指纹即可。DSIG 在 OpenType 1.9 中已被弃用，主要供旧版 Windows/Office 识别，来源认证请以上面的 attestation 为准。
 
 ## 安装
 
@@ -79,11 +95,11 @@ body {
 | 苹方汉字、假名、标点（含扩展 A 全部） | ✅ | ✅ | 苹方 UI 原生可变数据 |
 | 拉丁 / 希腊 / 西里尔（SF Pro，约 1,740 个码位，含 ASCII） | ✅ | ✅ | v1.1 用 SF Pro 在 15 个母版位置重建（opsz=17），字距同步可变 |
 | MiSans 9 种文字 | ✅ | — | MiSans 150–700 映射到 100–900（500 ↔ MiSans Medium 380），字宽轴不改变这些文字 |
-| Source Han Sans / TH-Hak / 补充字及部分符号（约 5,960 个码位） | — | — | 静态，详见已知限制 |
+| Source Han Sans / TH-Hak 补充字及部分符号（约 5,950 个码位） | — | — | 静态，详见已知限制 |
 
 ## 字符覆盖
 
-由 `build/coverage_stats.py` 统计（v1.1.0）：
+由 `build/coverage_stats.py` 统计（v1.1.1）：
 
 | 分类 | 码位数 |
 |---|--:|
@@ -99,7 +115,6 @@ body {
 | 藏文 | 211 |
 | 缅甸文 | 91 |
 | 高棉文 | 142 |
-| 爪哇文 | 13 |
 | 标点 / 符号 / 箭头 / 数学 / 几何等 | 2,755 |
 | CJK 符号与标点 / 假名 / 注音 / 部首 / 笔画 | 1,486 |
 | CJK 统一汉字（基本区 U+4E00–9FFF） | 20,992 |
@@ -109,7 +124,7 @@ body {
 | CJK 兼容汉字 | 537 |
 | 私用区（主要为 SF Symbols） | 8,447 |
 | 其他 | 195 |
-| **总计** | **53,007 码位 / 62,782 个字形** |
+| **总计** | **52,994 码位 / 62,782 个字形** |
 
 韩文音节未收录。
 
@@ -121,7 +136,7 @@ body {
 | **PingFang UI HK / SC** | 补充香港字 +1,008、简体字 +3,560；中文标点使用 SC 字形 |
 | **SF Pro**（可变） | 拉丁（含 ASCII）、希腊、西里尔等；字距（kern）与拉丁特性 |
 | **MiSans** Arabic / Devanagari / Gujarati / Gurmukhi / Khmer / Lao / Myanmar / Thai / Tibetan（可变） | 9 种文字的字形与全部排版规则 |
-| **Source Han Sans**、**TH-Hak** | 补充扩展区汉字（静态） |
+| **Source Han Sans**、**天珩字库-黑体 TH-Hak 4.0.0** | 补充扩展区汉字（静态） |
 
 ## 构建 / 复现
 
@@ -143,30 +158,39 @@ build/build.sh                # 生成 "PingFang-SF Medium.ttf" 并运行全部�
    - 用重建结果替换 SF（1,687 个）/ MiSans（1,578 个）字形的轮廓与 gvar，并补入 SF 的 1,436 个、MiSans 的 3,399 个替代/连字/组件字形；
    - `layout_merge.py` 把各来源的 GSUB / GPOS / GDEF（含 GDEF ItemVariationStore、MarkAttachClass、MarkGlyphSets、高棉文 FeatureVariations）合并为一套，`layout_sort.py` 按目标字形 ID 重排所有 Coverage 及并行数组；
    - 修正 8,049 个纵向前进宽度为 0 的字形（vmtx）、把 7 个带三次曲线标志的字形转为二次曲线、由 gvar 重建 HVAR。
-4. `step5_finalize.py`：中英文名称、版权/商标/许可说明、命名实例的 PostScript 名、head.yMin/yMax（保持苹方原值 −232/902）。
-5. 校验：`ots-sanitize`、`validate_font.py`（fontTools 完整读写往返、gvar glyphCount、wght=100/900 静态实例化）、`validate_shaping.py`（HarfBuzz 与各源字体逐字形比对，见下）。
+4. `step5_finalize.py`：中英文名称；`name` 表 ID 0/7/8/9/10/11/12/13/14 的版权、商标、制作者、说明与许可（英文 + zh-CN + zh-TW）；命名实例的 PostScript 名；head.yMin/yMax（保持苹方原值 −232/902）。
+5. `step6_notdef_metrics.py`（v1.1.1）：从苹方 UI TC 复制其 `.notdef`（方框内一个圆环，含 gvar，笔画随字重变化、宽度随字宽 800/1000/1200 变化，HVAR/vmtx 同步）；取消 13 个空白爪哇文占位码位；TH-Hak 中 36 个按 255/256 宽度绘制的扩展 B 汉字前进宽度 996→1000；16,907 个纵向前进为 500 的导入字形改为 1000（原点 860，与苹方一致）；按实际轮廓重算 head.xMin/xMax、hhea、vhea、maxp 与 OS/2.xAvgCharWidth（行高相关的 ascender/descender/lineGap/winAscent/winDescent 不变）。
+6. 校验：`ots-sanitize`、`validate_font.py`（fontTools 完整读写往返、gvar glyphCount、wght=100/900 静态实例化）、`validate_shaping.py`（HarfBuzz 与各源字体逐字形比对，见下）。
 
 另外 `extract_apple_fonts.sh` 可从任意 Apple 字体 DMG 中提取 TTF/OTF；`merge_arabic_gsub.py` 是独立的小工具，把阿拉伯文排版规则**合并**（而非替换）进其他字体。
 
-### 校验结果（v1.1.0）
+### 校验结果（v1.1.1）
 
 - `ots-sanitize`：通过（v1.0 因三次曲线标志无法通过）。
 - fontTools 读写往返、gvar `glyphCount` = `maxp.numGlyphs` = 62,782、wght 100/900 实例化：通过。
 - HarfBuzz 对比（157 项，0 失败）：9 种文字的样例在 wght 100 / 500 / 900 下与对应 MiSans 源字体的字形、前进宽度、标记偏移一致（偏差 ≤ 1 单位）；`AV` `To` `Ty` `LT` 字距分别为 −63 / −96 / −48 / −92；竖排 `，。、「」（）《》：！？` 与苹方 UI SC 的竖排字形一致。完整报告见 [docs/validation/shaping_report.txt](docs/validation/shaping_report.txt)。
+- 缺字显示：HarfBuzz（`hb-view`，无回退）下 U+D55C 한、U+20000 𠀀、U+A989 ꦉ 均显示 `.notdef` 方框，wght 100/500/900 下笔画粗细随之变化；Chromium 中 U+20000 显示方框。
 - 重新运行 `build/build.sh` 得到的字体与发布文件逐表一致（`head` 时间戳除外）。
 
 ## 已知限制
 
 - **授权**：组成字体均非开源（SF Pro 许可明确禁止再分发），本仓库只是个人研究用途的合并实验，存在版权风险。
-- **静态部分**：约 5,960 个码位（主要是 Source Han Sans / TH-Hak 补充的扩展 B 以后汉字中的 1,777 个、盲文 / 数学 / 技术符号、希腊扩展、IPA 扩展、爪哇文等）没有可变数据，在任何字重下都保持原样。
+- **静态部分**：约 5,950 个码位（主要是 Source Han Sans / TH-Hak 补充的扩展 B 以后汉字中的 1,777 个、盲文 / 数学 / 技术符号、希腊扩展、IPA 扩展、爪哇文等）没有可变数据，在任何字重下都保持原样。
 - **MiSans 文字**只随字重变化，不随字宽变化；MiSans 最粗只有 700（Heavy），所以 800–900 与 700 差别很小；MiSans 最细 150 对应 100。
 - **拉丁字重对应**沿用苹方 UI 内置拉丁的关系（wght 100 ↔ SF Pro 236，500 ↔ 540，900 ↔ 1000），因此 Ultralight 的拉丁比 SF Pro 自己的 Ultralight 粗；拉丁使用 SF Pro 的 Text 光学尺寸（opsz 17），字距也取自该尺寸。默认字重下 ASCII 与 v1.0 的差异 ≤ 1 个单位（实例化取整）。
 - **底本是繁体（TC）**：简体中文（zh-Hans）文本里同一码位的地区字形仍是繁体/台湾写法（苹方 UI 的 `locl` 只提供 ZHT/ZHH/JAN/ZHTM，没有 ZHS 分支）；标点使用 SC 字形，zh-Hant 下自动换成居中的 TC 标点。
 - **竖排**：`… — ～ ー` 等在源字体中也没有竖排字形，依赖排版引擎旋转；中文没有 `vpal` / `palt` 标点挤压（源字体也没有 GPOS）。
-- CJK 扩展 B 及以后只覆盖一部分（例如 U+20000 𠀀 缺字）；韩文音节未收录。
+- CJK 扩展 B 及以后只覆盖一部分（例如 U+20000 𠀀 缺字）；韩文音节、爪哇文未收录。缺字自 v1.1.1 起显示为 `.notdef` 方框（或由系统回退字体显示），不再是空白。
+- **最宽字形** 2,872 单位是 SF Pro 的私用区符号 U+102F90（源字体 5,882 / 2,048 UPEM，缩放正确），并非错误；三倍长破折号 ⸻ 等也属正常的宽字形。
 - 文件较大（约 63 MB），不适合直接作为网页字体。
 
 ## 更新日志
+
+### v1.1.1（2026-10-16）
+
+- **缺字方框**：`.notdef` 原为空字形，缺字时显示为空白；现改用苹方 UI 自身的 `.notdef`（方框 + 圆环），随字重/字宽可变。
+- **度量核查**：确认最宽前进宽度 2,872 来自 SF Pro 私用区符号 U+102F90（缩放正确，保留）；顺带修正与源字体不一致之处：13 个爪哇文码位映射到空白占位字形（已取消映射）、36 个 TH-Hak 扩展 B 汉字宽 996（改为 1000）、16,907 个导入字形纵向前进为 500（改为 1000，竖排不再重叠）；重算 head/hhea/vhea/OS/2 的全局度量，行高不变。
+- **版权与许可信息**：重写 `name` 表 ID 0/7/8/9/10/11/12/13/14（英文 + 简体 + 繁体），逐项写明苹方 UI、SF Pro、MiSans、思源黑体、天珩字库-黑体 TH-Hak 4.0.0 等组成部分的权利人与许可；README 与 NOTICE 同步更新。字体版本号 1.110。
 
 ### v1.1.0（2026-10-16）
 
@@ -187,9 +211,19 @@ build/build.sh                # 生成 "PingFang-SF Medium.ttf" 并运行全部�
 
 **本字体仅供个人、非商业的学习研究使用。** 本仓库不持有任何组成字体的版权，也不授予任何许可：
 
-- PingFang（苹方）与 SF Pro 为 Apple Inc. 的财产与商标；MiSans 为小米公司的财产与商标；Source Han Sans 为 Adobe 依 SIL OFL 1.1 发布；TH-Hak 归其作者。
+- PingFang（苹方）与 SF Pro 为 Apple Inc. 的财产与商标；MiSans 为小米公司的财产与商标；Source Han Sans 为 Adobe 依 SIL OFL 1.1 发布；天珩字库-黑体（TH-Hak）由沈天珩整理，作者声明其为非盈利学习研究用字库、不得收费或商用（[来源](http://cheonhyeong.com/Simplified/download.html)）。
 - 本字体按“原样”提供，**不附带任何担保**；使用者须自行遵守各组成字体的许可协议，并自行承担使用后果。请勿商用、再分发或嵌入到产品中。
 - 本项目与上述任何公司无关，也未获得其认可。
 - **如权利人要求，将立即删除。** 请通过 [GitHub Issues](https://github.com/Juwan-Hwang/PingFang-SF/issues) 联系。
+
+### 来源与版权
+
+| 组成部分 | 版权声明（摘自源字体） | 许可 | 来源 |
+|---|---|---|---|
+| 苹方 UI 21.4d1e1 | © 2024-2025 Apple Inc. | Apple 专有字体 | [ACT-02/PingFangUI-VF](https://github.com/ACT-02/PingFangUI-VF)（第三方重建） |
+| SF Pro 22.0d5e4 | © 2015-2026 Apple Inc. | Apple San Francisco 字体许可协议（禁止再分发/嵌入） | [Apple Developer Fonts](https://developer.apple.com/fonts/) |
+| MiSans（9 种文字）1.000/1.100 | © 2020-2023 Beijing Xiaomi Mobile Software Co., Ltd. | 《MiSans 字体知识产权许可协议》 | [hyperos.mi.com/font](https://hyperos.mi.com/font) |
+| 思源黑体 Source Han Sans | © 2014-2021 Adobe, Reserved Font Name “Source” | SIL OFL 1.1 | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans) |
+| 天珩字库-黑体 TH-Hak 4.0.0 | Copyright TH-fonts（沈天珩整理；字形版权据作者说明属中易、华康、Iwata、Besta、方正） | 作者声明：非盈利学习研究用，不得收费、不得商用 | [cheonhyeong.com](http://cheonhyeong.com/Simplified/download.html) |
 
 完整的来源与版权声明见 [NOTICE.md](NOTICE.md)。

@@ -1,0 +1,33 @@
+name: Attest release font
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        required: true
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - name: Prepare font and checksum
+        run: |
+          cp "PingFang-SF Medium.ttf" PingFang-SF-Medium.ttf
+          sha256sum PingFang-SF-Medium.ttf > SHA256SUMS
+          cat SHA256SUMS
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: PingFang-SF-Medium.ttf
+      - name: Upload checksum to release
+        run: gh release upload "$TAG" SHA256SUMS --clobber -R "$GITHUB_REPOSITORY"

@@ -1,4 +1,4 @@
-# Shaping validation for PingFang-SF Medium.ttf
+# Shaping validation for /workspace/projects/435d098d-7608-493c-a6d9-ceebc965f641/work/build_repro/out111.ttf
 OK   Arabic     wght=100  بِسْمِ                       max deviation 0.0
 OK   Arabic     wght=100  اللَّهِ                      max deviation 0.0
 OK   Arabic     wght=100  الرَّحْمَٰنِ                 max deviation 0.0
