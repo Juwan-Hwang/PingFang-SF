@@ -1,5 +1,11 @@
 # 苹方SF · PingFang SF
 
+<!-- PROMO_VIDEO -->
+
+[![宣传片封面](docs/images/promo-poster.png)](https://github.com/Juwan-Hwang/PingFang-SF/releases/download/v1.1.0/PingFang-SF-promo-1080p.mp4)
+
+<p align="center"><a href="https://github.com/Juwan-Hwang/PingFang-SF/releases/download/v1.1.0/PingFang-SF-promo-1080p.mp4">▶ 观看高清版宣传片（1080p · 有声 · MP4）</a></p>
+
 ![PingFang SF](docs/images/hero.png)
 
 以 **苹方 UI（PingFang UI）** 可变字体为底本，拉丁/希腊/西里尔文使用 **SF Pro**，并补充 **MiSans** 的 9 种文字与 Source Han Sans 等来源汉字的个人合并字体。一个文件、两个可变轴（字重 100–900、字宽 80–120），覆盖中文简繁、港澳字、拉丁、阿拉伯、印度与东南亚文字。
