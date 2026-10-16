@@ -1,8 +1,6 @@
 # 苹方SF · PingFang SF
 
-<!-- PROMO_VIDEO -->
-
-[![宣传片封面](docs/images/promo-poster.png)](https://github.com/Juwan-Hwang/PingFang-SF/releases/download/v1.1.0/PingFang-SF-promo-1080p.mp4)
+https://github.com/user-attachments/assets/a2d30dc7-78d6-407a-9442-e9c643997dc7
 
 <p align="center"><a href="https://github.com/Juwan-Hwang/PingFang-SF/releases/download/v1.1.0/PingFang-SF-promo-1080p.mp4">▶ 观看高清版宣传片（1080p · 有声 · MP4）</a></p>
 
