@@ -1,0 +1,164 @@
+# Shaping validation for PingFang-SF Medium.ttf
+OK   Arabic     wght=100  بِسْمِ                       max deviation 0.0
+OK   Arabic     wght=100  اللَّهِ                      max deviation 0.0
+OK   Arabic     wght=100  الرَّحْمَٰنِ                 max deviation 0.0
+OK   Arabic     wght=100  الرَّحِيمِ                   max deviation 0.0
+OK   Arabic     wght=100  لا                           max deviation 0.0
+OK   Arabic     wght=100  إله                          max deviation 0.0
+OK   Arabic     wght=100  إلا                          max deviation 0.0
+OK   Arabic     wght=100  الله                         max deviation 0.0
+OK   Arabic     wght=100  ببب                          max deviation 0.0
+OK   Arabic     wght=100  كتب                          max deviation 0.0
+OK   Arabic     wght=500  بِسْمِ                       max deviation 0.0
+OK   Arabic     wght=500  اللَّهِ                      max deviation 1.0
+OK   Arabic     wght=500  الرَّحْمَٰنِ                 max deviation 1.0
+OK   Arabic     wght=500  الرَّحِيمِ                   max deviation 1.0
+OK   Arabic     wght=500  لا                           max deviation 0.0
+OK   Arabic     wght=500  إله                          max deviation 0.0
+OK   Arabic     wght=500  إلا                          max deviation 0.0
+OK   Arabic     wght=500  الله                         max deviation 0.0
+OK   Arabic     wght=500  ببب                          max deviation 0.0
+OK   Arabic     wght=500  كتب                          max deviation 1.0
+OK   Arabic     wght=900  بِسْمِ                       max deviation 0.0
+OK   Arabic     wght=900  اللَّهِ                      max deviation 0.0
+OK   Arabic     wght=900  الرَّحْمَٰنِ                 max deviation 0.0
+OK   Arabic     wght=900  الرَّحِيمِ                   max deviation 0.0
+OK   Arabic     wght=900  لا                           max deviation 0.0
+OK   Arabic     wght=900  إله                          max deviation 0.0
+OK   Arabic     wght=900  إلا                          max deviation 0.0
+OK   Arabic     wght=900  الله                         max deviation 0.0
+OK   Arabic     wght=900  ببب                          max deviation 0.0
+OK   Arabic     wght=900  كتب                          max deviation 0.0
+OK   Devanagari wght=100  क्ष                          max deviation 0.0
+OK   Devanagari wght=100  स्त्र                        max deviation 0.0
+OK   Devanagari wght=100  क्षत्रिय                     max deviation 0.0
+OK   Devanagari wght=100  स्त्री                       max deviation 0.0
+OK   Devanagari wght=100  हिन्दी                       max deviation 0.0
+OK   Devanagari wght=100  र्क                          max deviation 0.0
+OK   Devanagari wght=100  द्ध                          max deviation 0.0
+OK   Devanagari wght=500  क्ष                          max deviation 0.0
+OK   Devanagari wght=500  स्त्र                        max deviation 0.0
+OK   Devanagari wght=500  क्षत्रिय                     max deviation 0.0
+OK   Devanagari wght=500  स्त्री                       max deviation 0.0
+OK   Devanagari wght=500  हिन्दी                       max deviation 1.0
+OK   Devanagari wght=500  र्क                          max deviation 0.0
+OK   Devanagari wght=500  द्ध                          max deviation 0.0
+OK   Devanagari wght=900  क्ष                          max deviation 0.0
+OK   Devanagari wght=900  स्त्र                        max deviation 0.0
+OK   Devanagari wght=900  क्षत्रिय                     max deviation 0.0
+OK   Devanagari wght=900  स्त्री                       max deviation 0.0
+OK   Devanagari wght=900  हिन्दी                       max deviation 0.0
+OK   Devanagari wght=900  र्क                          max deviation 0.0
+OK   Devanagari wght=900  द्ध                          max deviation 0.0
+OK   Gujarati   wght=100  ગુજરાતી                      max deviation 0.0
+OK   Gujarati   wght=100  ભાષા                         max deviation 0.0
+OK   Gujarati   wght=100  ક્ષ                          max deviation 0.0
+OK   Gujarati   wght=100  શ્રી                         max deviation 0.0
+OK   Gujarati   wght=500  ગુજરાતી                      max deviation 0.0
+OK   Gujarati   wght=500  ભાષા                         max deviation 0.0
+OK   Gujarati   wght=500  ક્ષ                          max deviation 0.0
+OK   Gujarati   wght=500  શ્રી                         max deviation 0.0
+OK   Gujarati   wght=900  ગુજરાતી                      max deviation 0.0
+OK   Gujarati   wght=900  ભાષા                         max deviation 0.0
+OK   Gujarati   wght=900  ક્ષ                          max deviation 0.0
+OK   Gujarati   wght=900  શ્રી                         max deviation 0.0
+OK   Gurmukhi   wght=100  ਪੰਜਾਬੀ                       max deviation 0.0
+OK   Gurmukhi   wght=100  ਭਾਸ਼ਾ                        max deviation 0.0
+OK   Gurmukhi   wght=100  ਗੁਰਮੁਖੀ                      max deviation 0.0
+OK   Gurmukhi   wght=500  ਪੰਜਾਬੀ                       max deviation 0.0
+OK   Gurmukhi   wght=500  ਭਾਸ਼ਾ                        max deviation 0.0
+OK   Gurmukhi   wght=500  ਗੁਰਮੁਖੀ                      max deviation 0.0
+OK   Gurmukhi   wght=900  ਪੰਜਾਬੀ                       max deviation 0.0
+OK   Gurmukhi   wght=900  ਭਾਸ਼ਾ                        max deviation 0.0
+OK   Gurmukhi   wght=900  ਗੁਰਮੁਖੀ                      max deviation 0.0
+OK   Khmer      wght=100  ភាសាខ្មែរ                    max deviation 0.0
+OK   Khmer      wght=100  ស្ត្រី                       max deviation 0.0
+OK   Khmer      wght=100  កម្ពុជា                      max deviation 0.0
+OK   Khmer      wght=500  ភាសាខ្មែរ                    max deviation 0.0
+OK   Khmer      wght=500  ស្ត្រី                       max deviation 0.0
+OK   Khmer      wght=500  កម្ពុជា                      max deviation 0.0
+OK   Khmer      wght=900  ភាសាខ្មែរ                    max deviation 0.0
+OK   Khmer      wght=900  ស្ត្រី                       max deviation 0.0
+OK   Khmer      wght=900  កម្ពុជា                      max deviation 0.0
+OK   Lao        wght=100  ພາສາລາວ                      max deviation 0.0
+OK   Lao        wght=100  ສະບາຍດີ                      max deviation 0.0
+OK   Lao        wght=500  ພາສາລາວ                      max deviation 0.0
+OK   Lao        wght=500  ສະບາຍດີ                      max deviation 0.0
+OK   Lao        wght=900  ພາສາລາວ                      max deviation 0.0
+OK   Lao        wght=900  ສະບາຍດີ                      max deviation 0.0
+OK   Myanmar    wght=100  မြန်မာဘာသာ                   max deviation 0.0
+OK   Myanmar    wght=100  ကြည့်                        max deviation 0.0
+OK   Myanmar    wght=500  မြန်မာဘာသာ                   max deviation 0.0
+OK   Myanmar    wght=500  ကြည့်                        max deviation 0.0
+OK   Myanmar    wght=900  မြန်မာဘာသာ                   max deviation 0.0
+OK   Myanmar    wght=900  ကြည့်                        max deviation 0.0
+OK   Thai       wght=100  สวัสดีครับ                   max deviation 0.0
+OK   Thai       wght=100  ภาษาไทย                      max deviation 0.0
+OK   Thai       wght=100  ที่นี่                       max deviation 0.0
+OK   Thai       wght=100  ปั้น                         max deviation 0.0
+OK   Thai       wght=500  สวัสดีครับ                   max deviation 0.0
+OK   Thai       wght=500  ภาษาไทย                      max deviation 0.0
+OK   Thai       wght=500  ที่นี่                       max deviation 0.0
+OK   Thai       wght=500  ปั้น                         max deviation 0.0
+OK   Thai       wght=900  สวัสดีครับ                   max deviation 0.0
+OK   Thai       wght=900  ภาษาไทย                      max deviation 0.0
+OK   Thai       wght=900  ที่นี่                       max deviation 0.0
+OK   Thai       wght=900  ปั้น                         max deviation 0.0
+OK   Tibetan    wght=100  བོད་ཡིག                      max deviation 0.0
+OK   Tibetan    wght=100  བསྒྲུབས                      max deviation 0.0
+OK   Tibetan    wght=100  ཀྲྀ                          max deviation 0.0
+OK   Tibetan    wght=500  བོད་ཡིག                      max deviation 0.0
+OK   Tibetan    wght=500  བསྒྲུབས                      max deviation 0.0
+OK   Tibetan    wght=500  ཀྲྀ                          max deviation 0.0
+OK   Tibetan    wght=900  བོད་ཡིག                      max deviation 0.0
+OK   Tibetan    wght=900  བསྒྲུབས                      max deviation 0.0
+OK   Tibetan    wght=900  ཀྲྀ                          max deviation 0.0
+OK   Latin      wght=100  AV                           advances [598, 663] vs SF [598, 663] (max dev 0)
+OK   Latin      wght=100  To                           advances [518, 590] vs SF [519, 590] (max dev 1)
+OK   Latin      wght=100  AVATAR                       advances [598, 598, 582, 541, 663, 635] vs SF [598, 598, 582, 541, 663, 635] (max dev 0)
+OK   Latin      wght=100  Today                        advances [518, 590, 613, 533, 522] vs SF [519, 590, 613, 533, 521] (max dev 1)
+OK   Latin      wght=100  office fi fl                 advances [590, 348, 348, 231, 560, 573, 265, 348, 231, 265, 348, 235] vs SF [590, 347, 347, 231, 559, 574, 266, 347, 231, 266, 347, 235] (max dev 1)
+OK   Latin      wght=100  Wave Type                    advances [903, 533, 503, 573, 265, 561, 522, 606, 573] vs SF [902, 533, 503, 574, 266, 561, 521, 606, 574] (max dev 1)
+OK   Latin      wght=100  ΑΥΓΟ                         advances [597, 640, 503, 759] vs SF [597, 641, 504, 759] (max dev 1)
+OK   Latin      wght=100  Жизнь                        advances [974, 599, 520, 593, 510] vs SF [974, 599, 520, 592, 511] (max dev 1)
+OK   Latin      wght=500  AV                           advances [638, 696] vs SF [638, 696] (max dev 0)
+OK   Latin      wght=500  To                           advances [550, 605] vs SF [551, 604] (max dev 1)
+OK   Latin      wght=500  AVATAR                       advances [638, 633, 622, 567, 701, 672] vs SF [638, 632, 622, 566, 701, 672] (max dev 1)
+OK   Latin      wght=500  Today                        advances [550, 605, 632, 552, 568] vs SF [551, 604, 631, 552, 568] (max dev 1)
+OK   Latin      wght=500  office fi fl                 advances [605, 385, 383, 266, 573, 585, 270, 383, 266, 270, 383, 273] vs SF [604, 386, 383, 266, 573, 585, 271, 383, 266, 271, 383, 272] (max dev 1)
+OK   Latin      wght=500  Wave Type                    advances [933, 552, 540, 585, 270, 598, 568, 627, 585] vs SF [933, 552, 541, 585, 271, 597, 568, 627, 585] (max dev 1)
+OK   Latin      wght=500  ΑΥΓΟ                         advances [636, 680, 530, 778] vs SF [636, 680, 531, 778] (max dev 1)
+OK   Latin      wght=500  Жизнь                        advances [1033, 625, 550, 619, 545] vs SF [1033, 625, 550, 618, 545] (max dev 1)
+OK   Latin      wght=900  AV                           advances [728, 769] vs SF [728, 769] (max dev 0)
+OK   Latin      wght=900  To                           advances [599, 649] vs SF [599, 648] (max dev 1)
+OK   Latin      wght=900  AVATAR                       advances [728, 706, 723, 619, 791, 735] vs SF [728, 705, 723, 618, 791, 735] (max dev 1)
+OK   Latin      wght=900  Today                        advances [599, 649, 689, 617, 651] vs SF [599, 648, 688, 618, 651] (max dev 1)
+OK   Latin      wght=900  office fi fl                 advances [649, 464, 454, 327, 615, 630, 234, 454, 327, 234, 454, 337] vs SF [648, 464, 454, 327, 615, 630, 234, 454, 327, 234, 454, 337] (max dev 1)
+OK   Latin      wght=900  Wave Type                    advances [979, 617, 598, 630, 234, 687, 651, 683, 630] vs SF [978, 618, 599, 630, 234, 687, 651, 684, 630] (max dev 1)
+OK   Latin      wght=900  ΑΥΓΟ                         advances [703, 760, 589, 801] vs SF [703, 761, 591, 801] (max dev 2)
+OK   Latin      wght=900  Жизнь                        advances [1077, 691, 624, 686, 640] vs SF [1077, 690, 625, 686, 641] (max dev 1)
+OK   kern      AV: kerning -63 units
+OK   kern      To: kerning -96 units
+OK   kern      Ty: kerning -48 units
+OK   kern      LT: kerning -92 units
+INFO liga      "fi" -> 2 glyph(s)
+OK   vert      ，  horizontal gid 30473 -> vertical gid 30353  extents (671, 714, 169, -325) (PingFang UI SC: (671, 714, 169, -325))
+OK   vert      。  horizontal gid 121 -> vertical gid 57924  extents (612, 714, 276, -266) (PingFang UI SC: (612, 714, 276, -266))
+OK   vert      、  horizontal gid 117 -> vertical gid 57925  extents (615, 713, 269, -263) (PingFang UI SC: (615, 713, 269, -263))
+OK   vert      「  horizontal gid 238 -> vertical gid 30451  extents (354, 219, 613, -329) (PingFang UI SC: (354, 219, 613, -329))
+OK   vert      」  horizontal gid 245 -> vertical gid 30412  extents (33, 830, 613, -329) (PingFang UI SC: (33, 830, 613, -329))
+OK   vert      （  horizontal gid 30493 -> vertical gid 30397  extents (33, 185, 934, -245) (PingFang UI SC: (33, 185, 934, -245))
+OK   vert      ）  horizontal gid 30495 -> vertical gid 30357  extents (33, 782, 934, -245) (PingFang UI SC: (33, 782, 934, -245))
+OK   vert      《  horizontal gid 30446 -> vertical gid 30389  extents (32, 379, 935, -458) (PingFang UI SC: (32, 379, 935, -458))
+OK   vert      》  horizontal gid 30388 -> vertical gid 30420  extents (33, 801, 934, -459) (PingFang UI SC: (33, 801, 934, -459))
+OK   vert      …  horizontal gid 30490 -> vertical gid 30490  extents (94, 146, 813, -151) (PingFang UI SC: (94, 146, 813, -151))  [no vertical form in source either]
+OK   vert      —  horizontal gid 30518 -> vertical gid 30518  extents (0, 404, 1000, -92) (PingFang UI SC: (0, 404, 1000, -92))  [no vertical form in source either]
+OK   vert      ：  horizontal gid 30474 -> vertical gid 30408  extents (676, 714, 151, -514) (PingFang UI SC: (676, 714, 151, -514))
+OK   vert      ！  horizontal gid 30472 -> vertical gid 30461  extents (677, 714, 147, -714) (PingFang UI SC: (677, 714, 147, -714))
+OK   vert      ？  horizontal gid 30476 -> vertical gid 35401  extents (474, 728, 456, -728) (PingFang UI SC: (474, 728, 456, -728))
+OK   vert      ～  horizontal gid 30497 -> vertical gid 30497  extents (111, 480, 780, -262) (PingFang UI SC: (111, 480, 780, -262))  [no vertical form in source either]
+INFO locl      zh-Hant  ，。骨 gids [57927, 30471, 2394] (zh-Hans [30473, 121, 2394])
+INFO locl      zh-HK    ，。骨 gids [57927, 30471, 2394] (zh-Hans [30473, 121, 2394])
+INFO locl      ja       ，。骨 gids [30473, 121, 2394] (zh-Hans [30473, 121, 2394])
+
+TOTAL FAILURES: 0
