@@ -1,4 +1,4 @@
-# Shaping validation for /workspace/projects/435d098d-7608-493c-a6d9-ceebc965f641/work/build_repro/out111.ttf
+# Shaping validation for ../../fill/out/final.ttf
 OK   Arabic     wght=100  بِسْمِ                       max deviation 0.0
 OK   Arabic     wght=100  اللَّهِ                      max deviation 0.0
 OK   Arabic     wght=100  الرَّحْمَٰنِ                 max deviation 0.0
@@ -142,23 +142,23 @@ OK   kern      To: kerning -96 units
 OK   kern      Ty: kerning -48 units
 OK   kern      LT: kerning -92 units
 INFO liga      "fi" -> 2 glyph(s)
-OK   vert      ，  horizontal gid 30473 -> vertical gid 30353  extents (671, 714, 169, -325) (PingFang UI SC: (671, 714, 169, -325))
-OK   vert      。  horizontal gid 121 -> vertical gid 57924  extents (612, 714, 276, -266) (PingFang UI SC: (612, 714, 276, -266))
-OK   vert      、  horizontal gid 117 -> vertical gid 57925  extents (615, 713, 269, -263) (PingFang UI SC: (615, 713, 269, -263))
-OK   vert      「  horizontal gid 238 -> vertical gid 30451  extents (354, 219, 613, -329) (PingFang UI SC: (354, 219, 613, -329))
-OK   vert      」  horizontal gid 245 -> vertical gid 30412  extents (33, 830, 613, -329) (PingFang UI SC: (33, 830, 613, -329))
-OK   vert      （  horizontal gid 30493 -> vertical gid 30397  extents (33, 185, 934, -245) (PingFang UI SC: (33, 185, 934, -245))
-OK   vert      ）  horizontal gid 30495 -> vertical gid 30357  extents (33, 782, 934, -245) (PingFang UI SC: (33, 782, 934, -245))
-OK   vert      《  horizontal gid 30446 -> vertical gid 30389  extents (32, 379, 935, -458) (PingFang UI SC: (32, 379, 935, -458))
-OK   vert      》  horizontal gid 30388 -> vertical gid 30420  extents (33, 801, 934, -459) (PingFang UI SC: (33, 801, 934, -459))
-OK   vert      …  horizontal gid 30490 -> vertical gid 30490  extents (94, 146, 813, -151) (PingFang UI SC: (94, 146, 813, -151))  [no vertical form in source either]
-OK   vert      —  horizontal gid 30518 -> vertical gid 30518  extents (0, 404, 1000, -92) (PingFang UI SC: (0, 404, 1000, -92))  [no vertical form in source either]
-OK   vert      ：  horizontal gid 30474 -> vertical gid 30408  extents (676, 714, 151, -514) (PingFang UI SC: (676, 714, 151, -514))
-OK   vert      ！  horizontal gid 30472 -> vertical gid 30461  extents (677, 714, 147, -714) (PingFang UI SC: (677, 714, 147, -714))
-OK   vert      ？  horizontal gid 30476 -> vertical gid 35401  extents (474, 728, 456, -728) (PingFang UI SC: (474, 728, 456, -728))
-OK   vert      ～  horizontal gid 30497 -> vertical gid 30497  extents (111, 480, 780, -262) (PingFang UI SC: (111, 480, 780, -262))  [no vertical form in source either]
-INFO locl      zh-Hant  ，。骨 gids [57927, 30471, 2394] (zh-Hans [30473, 121, 2394])
-INFO locl      zh-HK    ，。骨 gids [57927, 30471, 2394] (zh-Hans [30473, 121, 2394])
-INFO locl      ja       ，。骨 gids [30473, 121, 2394] (zh-Hans [30473, 121, 2394])
+OK   vert      ，  horizontal gid 41173 -> vertical gid 40957  extents (671, 714, 169, -325) (PingFang UI SC: (671, 714, 169, -325))
+OK   vert      。  horizontal gid 8218 -> vertical gid 56773  extents (612, 714, 276, -266) (PingFang UI SC: (612, 714, 276, -266))
+OK   vert      、  horizontal gid 8217 -> vertical gid 56774  extents (615, 713, 269, -263) (PingFang UI SC: (615, 713, 269, -263))
+OK   vert      「  horizontal gid 8228 -> vertical gid 41000  extents (354, 219, 613, -329) (PingFang UI SC: (354, 219, 613, -329))
+OK   vert      」  horizontal gid 8229 -> vertical gid 41001  extents (33, 830, 613, -329) (PingFang UI SC: (33, 830, 613, -329))
+OK   vert      （  horizontal gid 41169 -> vertical gid 40988  extents (33, 185, 934, -245) (PingFang UI SC: (33, 185, 934, -245))
+OK   vert      ）  horizontal gid 41170 -> vertical gid 40989  extents (33, 782, 934, -245) (PingFang UI SC: (33, 782, 934, -245))
+OK   vert      《  horizontal gid 8226 -> vertical gid 40996  extents (32, 379, 935, -458) (PingFang UI SC: (32, 379, 935, -458))
+OK   vert      》  horizontal gid 8227 -> vertical gid 40997  extents (33, 801, 934, -459) (PingFang UI SC: (33, 801, 934, -459))
+OK   vert      …  horizontal gid 4963 -> vertical gid 4963  extents (94, 146, 813, -151) (PingFang UI SC: (94, 146, 813, -151))  [no vertical form in source either]
+OK   vert      —  horizontal gid 4946 -> vertical gid 4946  extents (0, 404, 1000, -92) (PingFang UI SC: (0, 404, 1000, -92))  [no vertical form in source either]
+OK   vert      ：  horizontal gid 41187 -> vertical gid 40960  extents (676, 714, 151, -514) (PingFang UI SC: (676, 714, 151, -514))
+OK   vert      ！  horizontal gid 41162 -> vertical gid 40962  extents (677, 714, 147, -714) (PingFang UI SC: (677, 714, 147, -714))
+OK   vert      ？  horizontal gid 41192 -> vertical gid 40963  extents (474, 728, 456, -728) (PingFang UI SC: (474, 728, 456, -728))
+OK   vert      ～  horizontal gid 41255 -> vertical gid 41255  extents (111, 480, 780, -262) (PingFang UI SC: (111, 480, 780, -262))  [no vertical form in source either]
+INFO locl      zh-Hant  ，。骨 gids [56776, 40959, 35308] (zh-Hans [41173, 8218, 35308])
+INFO locl      zh-HK    ，。骨 gids [56776, 40959, 35308] (zh-Hans [41173, 8218, 35308])
+INFO locl      ja       ，。骨 gids [41173, 8218, 35308] (zh-Hans [41173, 8218, 35308])
 
 TOTAL FAILURES: 0

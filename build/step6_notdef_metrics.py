@@ -96,10 +96,10 @@ def recalc_metrics(f):
             G.recalcBounds(glyf)
         xs += [G.xMin, G.xMax]
     f['head'].xMin, f['head'].xMax = min(xs), max(xs)
-    f['head'].yMin, f['head'].yMax = HEAD_Y
     f['hhea'].recalc(f)
     f['vhea'].recalc(f)
-    f['maxp'].recalc(f)
+    f['maxp'].recalc(f)          # note: maxp.recalc() also rewrites the head bbox ...
+    f['head'].yMin, f['head'].yMax = HEAD_Y   # ... so pin yMin/yMax after it (v1.2.0 fix)
     recalc_avg_char_width(f)
     assert keep == (f['hhea'].ascent, f['hhea'].descent, f['hhea'].lineGap,
                     f['OS/2'].sTypoAscender, f['OS/2'].sTypoDescender, f['OS/2'].sTypoLineGap,

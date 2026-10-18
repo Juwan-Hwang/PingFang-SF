@@ -3,7 +3,7 @@
 # 依赖: gh (GitHub CLI) 或 curl, 7z, unzip
 set -euo pipefail
 cd "$(dirname "$0")/.."
-S=sources; mkdir -p "$S/v21" "$S/mvf" "$S/sf"
+S=sources; mkdir -p "$S/v21" "$S/mvf" "$S/sf" "$S/shs"
 # 1) PingFang UI 可变字体 TTC（ACT-02/PingFangUI-VF, release 21.4d1e1）
 if [ ! -f "$S/v21/PingFangUI.tahoe.26.4.1.wght.wdth.ttc" ]; then
   gh release download 21.4d1e1 -R ACT-02/PingFangUI-VF -D "$S/v21" -p 'PingFangUI.tahoe.26.4.1.wght.wdth.ttc'
@@ -30,4 +30,10 @@ if [ ! -f "$S/mvf/Tibetan.ttf" ]; then
   cp "$B/MiSans Thai /MiSansThaiVF.ttf"               "$S/mvf/Thai.ttf"
   cp "$B/MiSans Tibetan/MiSansTibetanVF.ttf"          "$S/mvf/Tibetan.ttf"
 fi
-sha256sum "$S/v21/"*.ttc "$S/sf/SFProFontsPackage.pkg/Library/Fonts/SF-Pro.ttf" "$S/mvf/"*.ttf
+# 4) 思源黑体可变字体（Adobe 官方，SIL OFL 1.1；tag 2.005R，glyf 格式，wght 250-900）
+#    sha256 23b20a0139e03981496b6e66bcb14263a517fd94624918289b8b988789a34a01
+if [ ! -f "$S/shs/SourceHanSans-VF.ttf" ]; then
+  curl -L -o "$S/shs/SourceHanSans-VF.ttf" \
+    https://github.com/adobe-fonts/source-han-sans/raw/2.005R/Variable/TTF/SourceHanSans-VF.ttf
+fi
+sha256sum "$S/v21/"*.ttc "$S/shs/SourceHanSans-VF.ttf" "$S/sf/SFProFontsPackage.pkg/Library/Fonts/SF-Pro.ttf" "$S/mvf/"*.ttf

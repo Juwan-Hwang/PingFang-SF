@@ -5,12 +5,12 @@ usage: python step5_finalize.py IN.ttf OUT.ttf
 import sys
 from fontTools.ttLib import TTFont
 
-VERSION = '1.110'
+VERSION = '1.200'
 REPO = 'https://github.com/Juwan-Hwang/PingFang-SF'
 NOTICE_URL = REPO + '/blob/main/NOTICE.md'
 THHAK_URL = 'http://cheonhyeong.com/Simplified/download.html'
 
-# --- name table text (v1.1.1). Every component, its true rights holder and its licence. ---
+# --- name table text (v1.1.1; v1.2.0 adds the variable Source Han Sans glyphs). Every component, its true rights holder and its licence. ---
 # Sources of each statement: the component fonts' own name tables (PingFang UI 21.4d1e1,
 # SF Pro 22.0d5e4, MiSans VF 1.000/1.100, TH-Hak V4.0.0/U15.0/220812), Adobe's OFL notice,
 # and the TH-Hak download page + readme (THHAK_URL).
@@ -55,16 +55,16 @@ DESIGNER = {
             '天珩字庫-黑體：沈天珩（TH-fonts）｜合併：Juwan-Hwang'),
 }
 DESCRIPTION = {
-    0x409: ('PingFang SF v1.1.1: PingFang UI (TC/HK/SC, variable wght 100-900, wdth 80-120, from '
+    0x409: ('PingFang SF v1.2.0: PingFang UI (TC/HK/SC, variable wght 100-900, wdth 80-120, from '
             'the ACT-02/PingFangUI-VF 21.4d1e1 reconstruction) + SF Pro Latin/Greek/Cyrillic and '
             'symbols + MiSans for Arabic and 8 South/Southeast Asian scripts + extra CJK from Source '
-            'Han Sans and TH-Hak 4.0.0 (' + THHAK_URL + '). '
+            'Han Sans (variable 2.005) and TH-Hak 4.0.0 (' + THHAK_URL + '). '
             'Not an Apple, Xiaomi, Adobe or TH-fonts product.'),
-    0x804: ('苹方SF v1.1.1：苹方 UI（繁/港/简，可变字重 100-900、字宽 80-120，取自 ACT-02/PingFangUI-VF 21.4d1e1 重建版）'
-            '+ SF Pro 拉丁/希腊/西里尔字母与符号 + MiSans 阿拉伯文及 8 种南亚/东南亚文字 + 思源黑体与天珩字库-黑体 4.0.0 补充汉字。'
+    0x804: ('苹方SF v1.2.0：苹方 UI（繁/港/简，可变字重 100-900、字宽 80-120，取自 ACT-02/PingFangUI-VF 21.4d1e1 重建版）'
+            '+ SF Pro 拉丁/希腊/西里尔字母与符号 + MiSans 阿拉伯文及 8 种南亚/东南亚文字 + 思源黑体（可变 2.005）与天珩字库-黑体 4.0.0 补充汉字。'
             '非 Apple、小米、Adobe 或天珩字库的官方产品。'),
-    0x404: ('蘋方SF v1.1.1：蘋方 UI（繁/港/簡，可變字重 100-900、字寬 80-120，取自 ACT-02/PingFangUI-VF 21.4d1e1 重建版）'
-            '+ SF Pro 拉丁/希臘/西里爾字母與符號 + MiSans 阿拉伯文及 8 種南亞/東南亞文字 + 思源黑體與天珩字庫-黑體 4.0.0 補充漢字。'
+    0x404: ('蘋方SF v1.2.0：蘋方 UI（繁/港/簡，可變字重 100-900、字寬 80-120，取自 ACT-02/PingFangUI-VF 21.4d1e1 重建版）'
+            '+ SF Pro 拉丁/希臘/西里爾字母與符號 + MiSans 阿拉伯文及 8 種南亞/東南亞文字 + 思源黑體（可變 2.005）與天珩字庫-黑體 4.0.0 補充漢字。'
             '非 Apple、小米、Adobe 或天珩字庫的官方產品。'),
 }
 LICENSE = {
@@ -111,7 +111,7 @@ def main(inp, outp):
         name.setName(sub, 2, *W, lang)
         name.setName('%s %s' % (fam, sub), 4, *W, lang)
     name.setName('PingFangSF-%s;%s;Juwan-Hwang' % (sub, VERSION), 3, *W, 0x409)
-    name.setName('Version %s; PingFang SF v1.1.1, merged from PingFang UI 21.4d1e1, SF Pro, '
+    name.setName('Version %s; PingFang SF v1.2.0, merged from PingFang UI 21.4d1e1, SF Pro, '
                  'MiSans, Source Han Sans, TH-Hak' % VERSION, 5, *W, 0x409)
     name.setName('PingFangSF-%s' % sub, 6, *W, 0x409)
     name.setName(TRADEMARK, 7, *W, 0x409)

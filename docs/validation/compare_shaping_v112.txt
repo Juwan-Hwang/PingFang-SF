@@ -1,0 +1,4 @@
+INFO intended change at wght 400: ⁇⁈⁉㍿🈻𣟱𨓜
+INFO intended change at wght 400: ⃀ ⃁
+INFO intended change at wght 400: ⌚☕⚽🆗🈯
+A/B shaping: 318 runs compared, 0 differ
