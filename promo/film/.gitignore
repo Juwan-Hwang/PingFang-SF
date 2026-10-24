@@ -1,0 +1,9 @@
+film/fonts/
+film/node_modules/
+film/atlas/
+film/out/
+repos/
+audio/*.wav
+audio/stems/
+__pycache__/
+*.rebuild.mp4

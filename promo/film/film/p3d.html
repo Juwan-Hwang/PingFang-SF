@@ -1,0 +1,163 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!--
+  PingFang SF launch film: the two 3D shots (three.js r170), rendered OFFLINE as frames by r3d_seq.py.
+    p3d.html?shot=open   6.0 s  the blue tittle blinks in the dark → on bar 1 the wordmark lands while its weight sweeps
+                                100 → 900 → (800 | 300) and the camera whips round it → square-on → push INTO the tittle
+    p3d.html?shot=end&ppu=&sx=&sy=   2.5 s  start inside the tittle → pull back → the wordmark flips in, its weight breathing
+                                in from 900 → lands pixel-matched on the comp's vector lockup
+  Geometry: '苹方SF' (wght 800) + space + 'PingFang SF' (wght 300), outlines shaped by HarfBuzz from the repo's font at
+  wght 100..900 step 25 (data/lockup.json, gen/gen_lockup_anat.py) and interpolated between neighbouring samples
+  (gvar keeps the point structure identical). World unit = 1 font unit, y up, origin = centre of the final lockup
+  (x = TW/2, y = 352 ≈ half the cap height). The i's tittle is the film's carry element: unlit accent.
+-->
+<style>html,body{margin:0;background:#111214;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const Q = new URLSearchParams(location.search);
+const W = 1920, H = 1080, SHOT = Q.get('shot') || 'open';
+const INK = '#111214', ACCENT = '#8AB4FF', ACCENT_SIDE = '#5F86CC', BODY = '#ECE9E2';
+const DEPTH = 110, BEV = 7, FRONT = DEPTH / 2 + BEV, FOV = 30, TANH = Math.tan((FOV / 2) * Math.PI / 180);
+const W1 = 800, W2 = 300, OY = 352;
+
+const L = await (await fetch('data/lockup.json')).json();
+const S = L.samples;
+const at = (w) => { const k = Math.min(S.length - 1.000001, Math.max(0, (w - 100) / 25)); return [Math.floor(k), k - Math.floor(k)]; };
+const nums = (d) => d.match(/-?\d+\.?\d*/g).map(Number);
+const tmpl = (d) => d.split(/-?\d+\.?\d*/g);
+const cache = new Map();
+const parsed = (i, key, gi) => { const id = i + key + gi; if (!cache.has(id)) { const s = S[i]; const d = key === 'tittle' ? s.tittle : s[key][gi].d; cache.set(id, { n: nums(d), t: tmpl(d), x: key === 'tittle' ? 0 : s[key][gi].x }); } return cache.get(id); };
+function lerpD(key, gi, w, dx) {           // interpolated outline string, shifted by dx font units
+  const [i, f] = at(w), a = parsed(i, key, gi), b = parsed(i + 1, key, gi);
+  let out = a.t[0];
+  for (let k = 0; k < a.n.length; k++) { let v = a.n[k] + (b.n[k] - a.n[k]) * f; if (k % 2 === 0) v += dx; out += v.toFixed(2) + a.t[k + 1]; }
+  return out;
+}
+const lerpS = (key, w) => { const [i, f] = at(w); return S[i][key] + (S[i + 1][key] - S[i][key]) * f; };
+const TW = S[(W1 - 100) / 25].adv1 + S[(W2 - 100) / 25].space + S[(W2 - 100) / 25].adv2;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(INK);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+
+const bodyMat = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(BODY), roughness: 0.42, metalness: 0.0, clearcoat: 0.5, clearcoatRoughness: 0.22 });
+const capMats = [new THREE.MeshBasicMaterial({ color: ACCENT, toneMapped: false }), new THREE.MeshBasicMaterial({ color: ACCENT_SIDE, toneMapped: false })];
+const word = new THREE.Mesh(new THREE.BufferGeometry(), bodyMat);
+const tit = new THREE.Mesh(new THREE.BufferGeometry(), capMats);
+const grp = new THREE.Group(); grp.add(word); scene.add(grp); scene.add(tit);
+const loader = new SVGLoader();
+function shapesFrom(d) { return SVGLoader.createShapes(loader.parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`).paths[0]); }
+function extrude(shapes, depth, bevel, seg) {
+  const g = new THREE.ExtrudeGeometry(shapes, { depth, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * 0.8, bevelOffset: -bevel * 0.8, bevelSegments: 3, curveSegments: seg });
+  g.translate(0, -OY, -depth / 2); g.computeVertexNormals(); return g;
+}
+let lastKey = '', TIT = { x: 0, y: 0, w: 1, h: 1 };
+function build(w1, w2) {                    // rebuild the wordmark at weights (w1, w2); centred on its current width
+  const key = w1.toFixed(2) + '|' + w2.toFixed(2); if (key === lastKey) return; lastKey = key;
+  const a1 = lerpS('adv1', w1), sp = lerpS('space', w2), a2 = lerpS('adv2', w2), tw = a1 + sp + a2, x0 = -tw / 2;
+  const ds = [];
+  S[0].run1.forEach((g, gi) => ds.push(lerpD('run1', gi, w1, x0)));
+  S[0].run2.forEach((g, gi) => ds.push(lerpD('run2', gi, w2, x0 + a1 + sp)));
+  const shapes = ds.flatMap(shapesFrom);
+  word.geometry.dispose(); word.geometry = extrude(shapes, DEPTH, BEV, 14);
+  const td = lerpD('tittle', 0, w2, x0 + a1 + sp);
+  tit.geometry.dispose(); tit.geometry = extrude(shapesFrom(td), DEPTH + 2 * BEV, 0, 10);
+  tit.geometry.computeBoundingBox(); const b = tit.geometry.boundingBox;
+  TIT = { x: (b.min.x + b.max.x) / 2, y: (b.min.y + b.max.y) / 2, w: b.max.x - b.min.x, h: b.max.y - b.min.y };
+}
+build(W1, W2); const TIT0 = { ...TIT };
+// glow behind the tittle (gone by the handoff: the vector has none)
+const gc = document.createElement('canvas'); gc.width = gc.height = 128;
+{ const c = gc.getContext('2d'), g = c.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(160,196,255,0.95)'); g.addColorStop(0.3, 'rgba(138,180,255,0.28)'); g.addColorStop(1, 'rgba(138,180,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 128, 128); }
+const glow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(gc), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+scene.add(glow);
+const titLight = new THREE.PointLight(ACCENT, 0, 0, 2); scene.add(titLight);
+const key = new THREE.SpotLight('#fff6ec', 0, 0, Math.PI / 6, 0.88, 0); key.position.set(-5200, 4200, 7400); scene.add(key); scene.add(key.target);
+const rim = new THREE.DirectionalLight('#dfe6ff', 0); rim.position.set(3000, 1600, -4000); scene.add(rim);
+const sweep = new THREE.PointLight('#ffffff', 0, 0, 0); scene.add(sweep);
+const camera = new THREE.PerspectiveCamera(FOV, W / H, 5, 200000);
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const expoIn = (x) => (x <= 0 ? 0 : Math.pow(2, 10 * x - 10));
+const expoOut = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const expoInOut = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2);
+const sineInOut = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+const cubicOut = (x) => 1 - Math.pow(1 - x, 3);
+function spring(x, w = 9, z = 0.55) { if (x <= 0) return 0; const wd = w * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w * x) * (Math.cos(wd * x) + (z * w / wd) * Math.sin(wd * x)); }
+function orbitCam(tx, ty, d, yaw, pitch, roll = 0) {
+  camera.position.set(tx + Math.sin(yaw) * Math.cos(pitch) * d, ty + Math.sin(pitch) * d, Math.cos(yaw) * Math.cos(pitch) * d);
+  camera.up.set(Math.sin(roll), Math.cos(roll), 0); camera.lookAt(tx, ty, 0); camera.updateProjectionMatrix();
+}
+function lights(li, t, s0, s1) {
+  key.intensity = 1.6 * li; rim.intensity = 1.5 * li; scene.environmentIntensity = 0.34 * li + 0.02;
+  const sw = seg(t, s0, s1);
+  sweep.position.set(lerp(-6500, 6500, sineInOut(sw)), lerp(1800, -900, sineInOut(sw)), 1500);
+  sweep.intensity = 2.4 * Math.sin(Math.PI * sw) * li;
+}
+function placeCarry(on, glowA) {
+  tit.visible = glow.visible = on;
+  glow.position.set(TIT.x, TIT.y, -DEPTH / 2 - BEV - 4); glow.scale.set(TIT.w * 7, TIT.h * 7, 1); glow.material.opacity = glowA;
+  titLight.position.set(TIT.x, TIT.y + 40, FRONT + 160); titLight.intensity = on ? 2.6e5 * glowA : 0;
+}
+const R = TW;                                            // lockup width → camera distances scale with it
+const dFit = R * 1.25 / (2 * TANH * (W / H));            // the whole lockup across ~80 % of the frame
+const dInside = FRONT + TIT0.w * 0.32;
+
+// OPEN 6 s (120 BPM, bar = 2 s)
+function shotOpen(t) {
+  const on = (t >= 0.25 && t < 0.75) || (t >= 1.0 && t < 1.5) || t >= 1.75;
+  // the wordmark's weight: hairline on arrival → Black on the whip → its lockup weights as it settles
+  const mw = expoInOut(seg(t, 2.0, 3.25)), ms = sineInOut(seg(t, 3.3, 4.25));
+  const w1 = lerp(lerp(100, 900, mw), W1, ms), w2 = lerp(lerp(100, 900, mw), W2, ms);
+  build(w1, w2);
+  word.visible = t >= 1.92;
+  const land = spring(seg(t, 1.92, 3.8) * 1.9, 7.5, 0.62);
+  grp.rotation.set(lerp(0.18, 0, land), lerp(-Math.PI * 0.42, 0, land), 0);
+  grp.position.z = lerp(-900, 0, land);
+  placeCarry(on, 0.42 * (1 - seg(t, 4.4, 5.6) * 0.6));
+  const p1 = cubicOut(seg(t, 0.0, 2.0)), w = expoInOut(seg(t, 1.85, 3.5)), st = sineInOut(seg(t, 3.2, 4.3));
+  let yaw = lerp(0.55, 0.42, p1); yaw = lerp(yaw, -0.36, w); yaw = lerp(yaw, 0, st);
+  let pitch = lerp(-0.16, -0.1, p1); pitch = lerp(pitch, 0.12, w); pitch = lerp(pitch, 0, st);
+  const roll = Math.sin(Math.PI * w) * 0.05 * (1 - st);
+  let d = Math.exp(lerp(Math.log(TIT.w * 5), Math.log(TIT.w * 11), p1)); d = Math.exp(lerp(Math.log(d), Math.log(dFit * 1.1), w)); d = lerp(d, dFit, st);
+  let tx = lerp(TIT.x, TIT.x, p1), ty = TIT.y; tx = lerp(tx, TIT.x * 0.25, w); ty = lerp(ty, 60, w); tx = lerp(tx, 0, st); ty = lerp(ty, 0, st);
+  const pu = expoIn(seg(t, 4.55, 5.85));
+  const pc = sineInOut(seg(t, 4.55, 5.5));
+  tx = lerp(tx, TIT.x, pc); ty = lerp(ty, TIT.y, pc);
+  d = Math.exp(lerp(Math.log(d), Math.log(dInside), pu));
+  orbitCam(tx, ty, d, yaw * (1 - pu), pitch * (1 - pu), roll);
+  lights(0.35 + 0.65 * cubicOut(seg(t, 0.6, 1.9)), t, 2.4, 4.6);
+}
+// END 2.5 s: inside the tittle → pull back → the wordmark flips in → lands EXACTLY where the 2D lockup is drawn
+const PPU = +(Q.get('ppu') || 0.132), SX = +(Q.get('sx') || 960), SY = +(Q.get('sy') || 520);
+function shotEnd(t) {
+  const mw = sineInOut(seg(t, 0.3, 1.9));
+  build(lerp(900, W1, mw), lerp(900, W2, mw));
+  word.visible = true;
+  const flip = spring(seg(t, 0.2, 2.4) * 2.15, 7.5, 0.6);
+  grp.rotation.set(0, lerp(Math.PI * 0.5, 0, flip), 0); grp.position.z = 0;
+  placeCarry(true, 0.55 * (1 - seg(t, 1.6, 2.2)));
+  const dL = FRONT + H / (2 * TANH * PPU);
+  const txL = (960 - SX) / PPU, tyL = (SY - 540) / PPU;
+  const p = expoOut(seg(t, 0.05, 1.9));
+  const d = Math.exp(lerp(Math.log(dInside), Math.log(dL), p));
+  const tx = lerp(TIT.x, txL, sineInOut(seg(t, 0.12, 1.9))), ty = lerp(TIT.y, tyL, sineInOut(seg(t, 0.12, 1.9)));
+  const set = seg(t, 1.5, 2.25), yaw = -0.12 * (1 - sineInOut(set)) * seg(t, 0, 0.6), pitch = 0.05 * (1 - sineInOut(set)) * seg(t, 0, 0.6);
+  orbitCam(tx, ty, d, yaw, pitch, 0);
+  lights(1, t, 0.3, 2.2);
+}
+window.__seek = (t) => { (SHOT === 'open' ? shotOpen : shotEnd)(t); renderer.render(scene, camera); return true; };
+window.__info = () => ({ TW, TIT0, dFit, dInside });
+window.__ready = true;
+</script></body></html>

@@ -1,0 +1,760 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!--
+  PingFang SF · launch film. One seekable timeline; every frame is a pure function of t.
+  120 BPM (bar = 2 s), 58.5 s, two cuts: comp.html?lang=en | ?lang=zh.  ?t=12.3 draws that moment (for stills).
+  Every glyph on screen is the repo's own font file (fonts/PingFangSF.ttf = "PingFang-SF Medium.ttf" v1.2.0): live text
+  in the browser, or outlines read from it (data/*.json, atlas/*.png via gen/*.py). No other typeface is loaded.
+  The carry element is the tittle of the i in "PingFang": one blue dot, the only accent-coloured thing in the film.
+  Contract: __ready, __meta, __seek(t), __motion(t0,t1), __events(), __handoff(), __copy.
+-->
+<style>
+@font-face{font-family:"PFSF";src:url("fonts/PingFangSF.ttf") format("truetype");font-weight:100 900;font-stretch:80% 120%;font-display:block}
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#111214;font-family:"PFSF";color:#F4F2EC;font-kerning:normal}
+.abs{position:absolute;left:0;top:0}
+.ln{position:absolute;left:0;top:0;white-space:pre;line-height:1}
+.ln span{display:inline-block;white-space:pre}
+#f3d,#lockA{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#carry{position:absolute;left:0;top:0;background:#8AB4FF;will-change:transform}
+.cap{position:absolute;left:120px;white-space:nowrap;line-height:1}
+.capH{font-size:46px;font-variation-settings:'wght' 600;letter-spacing:-0.3px}
+.capS{font-size:26px;font-variation-settings:'wght' 450;color:#9C9A93;letter-spacing:0.2px}
+html[lang=zh-Hans] .capH{letter-spacing:1px}
+html[lang=zh-Hans] .capS{letter-spacing:1.5px}
+.mask{position:absolute;left:0;overflow:hidden;width:1920px}
+.hud{font-size:26px;font-variation-settings:'wght' 450;color:#9C9A93;font-variant-numeric:tabular-nums;letter-spacing:0.5px;white-space:pre}
+.lbl{position:absolute;font-size:21px;font-variation-settings:'wght' 450;color:#8F8D86;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.4px}
+#term{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+#twin{position:absolute;left:340px;top:150px;width:1240px;height:720px;border-radius:18px;background:#1A1B1E;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 40px 120px rgba(0,0,0,0.5)}
+#tbar{position:absolute;left:0;top:0;width:1240px;height:52px;border-bottom:1px solid rgba(255,255,255,0.06)}
+#tbar i{position:absolute;top:19px;width:14px;height:14px;border-radius:7px;background:#3A3B3F}
+#ttitle{position:absolute;left:0;width:1240px;top:16px;text-align:center;font-size:20px;color:#8F8D86;font-variation-settings:'wght' 500;line-height:1}
+.tl{position:absolute;left:380px;font-size:26px;line-height:1;white-space:pre;font-variant-numeric:tabular-nums;font-variation-settings:'wght' 450}
+.tl span{display:inline-block;white-space:pre}
+.tl .pr{color:#8F8D86}
+.tl.o{color:#C9C7C0}
+.gr{position:absolute;left:0;top:0;white-space:nowrap;font-size:150px;line-height:1;font-variation-settings:'wght' 500}
+.gl{position:absolute;left:0;top:0;white-space:nowrap;font-size:24px;line-height:1;font-variation-settings:'wght' 450;color:#8F8D86;letter-spacing:2px}
+html[lang=zh-Hans] .gl{letter-spacing:3px}
+.vc{position:absolute;left:0;top:0;font-size:80px;line-height:1;font-variation-settings:'wght' 500;white-space:pre}
+.vv{writing-mode:vertical-rl}
+#vtH{position:absolute;left:0;top:0;font-size:80px;line-height:1;white-space:pre;font-variation-settings:'wght' 500;opacity:0}
+#vtV{position:absolute;left:0;top:0;font-size:80px;line-height:1;white-space:pre;font-variation-settings:'wght' 500;writing-mode:vertical-rl;opacity:0}
+#vtH span,#vtV span{display:inline-block}
+#fade{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000;opacity:0}
+#hud{position:absolute;right:16px;top:12px;font:16px monospace;color:#0f0;z-index:9}
+</style>
+<script src="mspring.js"></script>
+</head><body>
+<div id="stage">
+  <img id="f3d" style="display:none">
+  <!-- S2 thesis + S9 finale (typed lines) -->
+  <div id="sT" class="abs"></div>
+  <!-- S3/S4 specimen: drawn in screen space from the font's own points -->
+  <svg id="sSpec" class="abs" width="1920" height="1080" viewBox="0 0 1920 1080" style="display:none">
+    <defs><clipPath id="specClip"><rect id="specClipR" x="0" y="0" width="1920" height="1080"/></clipPath></defs>
+    <g id="mLines"></g>
+    <g clip-path="url(#specClip)"><path id="specFill" fill="#F4F2EC"/></g>
+    <path id="specOut" fill="none" stroke="#F4F2EC" stroke-width="2" stroke-linejoin="round"/>
+    <path id="specHdl" fill="none" stroke="#6B6A65" stroke-width="1.25"/>
+    <path id="specOff" fill="#111214" stroke="#9C9A93" stroke-width="1.6"/>
+    <path id="specOn" fill="#F4F2EC"/>
+    <path id="specTit" fill="#8AB4FF"/>
+  </svg>
+  <div id="mLbl" class="abs"></div>
+  <div id="axisHud" class="abs hud" style="display:none"></div>
+  <!-- S5 scripts -->
+  <div id="sG" class="abs" style="display:none"></div>
+  <!-- S6 glyph grid -->
+  <div id="sGrid" class="abs" style="display:none;width:1920px;height:1080px;overflow:hidden">
+    <div id="gWorld" class="abs" style="transform-origin:0 0"></div>
+    <div id="gLbl" class="abs"></div>
+  </div>
+  <!-- S7 vertical -->
+  <div id="sV" class="abs" style="display:none"><div id="vtH"></div><div id="vtV"></div><div id="vChars" class="abs"></div></div>
+  <!-- S8 terminal (real transcript: session/term_final.txt) -->
+  <div id="sTerm" class="abs" style="display:none;width:1920px;height:1080px">
+    <div id="term"><div id="twin"><div id="tbar"><i style="left:22px"></i><i style="left:46px"></i><i style="left:70px"></i><div id="ttitle"></div></div></div><div id="tlines" class="abs"></div></div>
+  </div>
+  <!-- S11 lockup: the wordmark as outlines from the font (w800 + w300), tittle in accent -->
+  <svg id="lockV" class="abs" width="1920" height="1080" viewBox="0 0 1920 1080" style="display:none">
+    <g id="lockG"><path id="lockP" fill="#F4F2EC"/></g><path id="lockT" fill="#8AB4FF"/>
+  </svg>
+  <div id="lockSub" class="abs" style="display:none"></div>
+  <div id="carry"></div>
+  <div id="caps" class="abs"></div>
+  <div id="fade"></div>
+  <div id="hud"></div>
+</div>
+<script>
+'use strict';
+const Q = new URLSearchParams(location.search);
+const LANG = Q.get('lang') === 'zh' ? 'zh' : 'en';
+if (LANG === 'zh') document.documentElement.lang = 'zh-Hans';
+const FPS = 30, BPM = 120, BAR = 2, BEAT = 0.5, DUR = 58.5;
+const ACC = '#8AB4FF', PAPER = '#F4F2EC';
+
+// ───────────────────────── copy (one language per cut; specimens, commands and output are data) ─────────────────────────
+const COPY = {
+  en: {
+    th1: 'Chinese and Latin,', th2: 'set as one.',
+    harmH: 'SF Pro Latin. PingFang Chinese.', harmS: 'One em square, one baseline, matched weights.',
+    mEmTop: 'em top', mCap: 'cap height', mX: 'x-height', mBase: 'baseline', mEmBot: 'em bottom',
+    varH: 'Variable, from 100 to 900.', varS: 'Weight and width axes. Every point moves.',
+    scrH: '56,497 characters.', scrS: 'Latin, Greek, Cyrillic, Arabic, Indic, Southeast Asian, Hangul, Han — one file.',
+    gH: '65,535 glyphs.', gS: 'Every slot TrueType allows, filled.', gLast: 'last glyph', gNone: 'no 65,536th slot',
+    vH: 'Vertical, too.', vS: 'Punctuation turns with the line.',
+    tTitle: 'Terminal', iH: 'Install once. Nine named weights.', iS: 'Found by its English or Chinese name.',
+    fin: 'One font. Every script.',
+    lic: 'v1.2.0 · For personal, non-commercial use',
+  },
+  zh: {
+    th1: '中文与拉丁，', th2: '浑然一体',
+    harmH: 'SF Pro 的拉丁，苹方的汉字', harmS: '同一个字身框，同一条基线，字重彼此匹配',
+    mEmTop: '字身框顶', mCap: '大写高度', mX: '小写高度', mBase: '基线', mEmBot: '字身框底',
+    varH: '从 100 到 900，连续可变', varS: '字重、字宽两个轴，每个点都在移动',
+    scrH: '56,497 个字符', scrS: '拉丁、希腊、西里尔、阿拉伯、印度诸文、东南亚诸文、韩文、汉字，同在一个文件',
+    gH: '65,535 个字形', gS: 'TrueType 允许的字形数，一个不剩', gLast: '最后一个字形', gNone: '没有第 65,536 格',
+    vH: '竖排，同样从容', vS: '标点随行转向',
+    tTitle: '终端', iH: '装一次，九个字重齐备', iS: '中文名、英文名，都能找到',
+    fin: '一个字体，书写世界',
+    lic: 'v1.2.0 · 仅供个人非商业学习研究',
+  },
+}[LANG];
+window.__copy = COPY;
+
+// ───────────────────────── helpers ─────────────────────────
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, u) => a + (b - a) * u;
+const lerp2 = (a, b, u) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u)];
+const expoIn = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : Math.pow(2, 10 * x - 10));
+const expoOut = (x) => (x >= 1 ? 1 : x <= 0 ? 0 : 1 - Math.pow(2, -10 * x));
+const expoInOut = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2);
+const { appleOut, appleInOut, whip } = MO;
+const easeInC = (x) => x * x * x;
+const SPC = {}; const sp = (vd, b) => (SPC[vd + ':' + b] ||= MO.spring(vd, b));
+const r2 = (v) => Math.round(v * 100) / 100;
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
+const pending = [];
+function setSrc(img, src) { if (img.getAttribute('src') !== src) { img.setAttribute('src', src); pending.push(img.decode().catch(() => {})); } }
+function show(el, on) { el.style.display = on ? '' : 'none'; }
+function op(el, v) { el.style.opacity = clamp(v).toFixed(3); }
+
+// carry: exactly one section sets it per frame
+let CAR = null;
+function carry(x, y, w, h, r = 0.5, o = 1) { CAR = { x, y, w, h, r, o }; }
+function drawCarry() {
+  const el = $('carry');
+  if (!CAR || CAR.o <= 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.style.width = r2(CAR.w) + 'px'; el.style.height = r2(CAR.h) + 'px';
+  el.style.borderRadius = r2(Math.min(CAR.w, CAR.h) * CAR.r) + 'px';
+  el.style.transform = `translate(${r2(CAR.x - CAR.w / 2)}px,${r2(CAR.y - CAR.h / 2)}px)`;
+  el.style.opacity = CAR.o;
+}
+// field (2100×1240) ⇄ dot, log-space size, centre follows the size (the field closes ONTO the dot)
+function fieldZoom(u, dot) {
+  const F = { x: 960, y: 540, w: 2300, h: 1400 };
+  const w = Math.exp(lerp(Math.log(F.w), Math.log(dot.w), u)), h = Math.exp(lerp(Math.log(F.h), Math.log(dot.h), u));
+  const k = (Math.log(F.w) - Math.log(w)) / (Math.log(F.w) - Math.log(dot.w));
+  return { x: lerp(F.x, dot.x, k), y: lerp(F.y, dot.y, k), w, h, r: lerp(0, 0.5, k) };
+}
+
+// ───────────────────────── captions ─────────────────────────
+const CAPS = [];
+function caption(id, t0, t1, head, sub) { CAPS.push({ id, t0, t1, head, sub }); }
+function buildCaps() {
+  const root = $('caps');
+  for (const c of CAPS) {
+    const mk = (cls, txt, base, size) => {
+      const m = document.createElement('div'); m.className = 'mask'; m.style.top = (base - size * 1.05) + 'px'; m.style.height = (size * 1.4) + 'px';
+      const d = document.createElement('div'); d.className = 'cap ' + cls; d.textContent = txt; d.style.top = (size * 0.05) + 'px';
+      m.appendChild(d); root.appendChild(m); return { m, d };
+    };
+    c.h = mk('capH', c.head, 940, 46); c.s = c.sub ? mk('capS', c.sub, 988, 26) : null;
+  }
+}
+function drawCaps(t) {
+  for (const c of CAPS) {
+    const on = t >= c.t0 - 0.01 && t < c.t1 + 0.3;
+    show(c.h.m, on); if (c.s) show(c.s.m, on);
+    if (!on) continue;
+    [c.h, c.s].forEach((L, i) => {
+      if (!L) return;
+      const a = sp(0.5, 0)(t - c.t0 - i * 0.065), out = easeInC(seg(t, c.t1, c.t1 + 0.28));
+      const y = Math.round((1 - a) * 64 + out * 26);
+      L.d.style.transform = `translateY(${y}px)`; op(L.d, (1 - out));
+    });
+  }
+}
+
+// ───────────────────────── typed lines ─────────────────────────
+const LINES = {};
+function typedLine(id, text, size, wght, t0, dur, track) {
+  const d = document.createElement('div'); d.className = 'ln'; d.style.fontSize = size + 'px';
+  d.style.fontVariationSettings = `'wght' ${wght}`; if (track != null) d.style.letterSpacing = track + 'px';
+  for (const ch of [...text]) { const s = document.createElement('span'); s.textContent = ch; d.appendChild(s); }
+  $('sT').appendChild(d);
+  LINES[id] = { el: d, text: [...text], size, t0, dur, spans: [...d.children], right: [], x: 0, base: 0 };
+  return LINES[id];
+}
+function measureLine(L) { const r0 = L.el.getBoundingClientRect(); L.right = L.spans.map((s) => s.getBoundingClientRect().right - r0.left); L.width = L.right[L.right.length - 1]; }
+function nTyped(L, t) { return Math.floor(clamp((t - L.t0) / L.dur) * L.text.length + 1e-6); }
+function drawLine(L, t, dy = 0, o = 1) {
+  const n = nTyped(L, t);
+  L.spans.forEach((s, i) => { s.style.opacity = i < n ? 1 : 0; });
+  L.el.style.transform = `translate(${Math.round(L.x)}px,${Math.round(L.base - L.size * 0.86 + dy)}px)`;   // line box top ≈ baseline − ascent
+  op(L.el, o); show(L.el, true);
+  return n;
+}
+function penAt(L, n) {   // the dot as the pen: tittle height, 0.08 em after the last glyph
+  const s = L.size, x = L.x + (n > 0 ? L.right[n - 1] : 0) + s * 0.08 + s * 0.065;
+  return { x, y: L.base - s * 0.685, w: s * 0.13, h: s * 0.13 };
+}
+const keyEvents = [];
+function lineKeys(L, every) { const n = L.text.length; for (let i = 0; i < n; i++) if (L.text[i] !== ' ' && (i % every === 0)) keyEvents.push({ t: L.t0 + (i + 0.5) * L.dur / n, kind: 'key' }); }
+
+// ───────────────────────── data ─────────────────────────
+let SPEC, LOCK, GREET, TERM;
+const SPEC_S = 0.3, SPEC_BASE = 640;      // specimen at 300 px/em, baseline y
+
+// ───────────────────────── timeline constants (120 BPM; bars on the left) ─────────────────────────
+const T = {
+  open: [0, 6],                 // bars 0–3   3D open
+  thesis: [6, 10],              // bars 3–5
+  spec: [10, 22],               // bars 5–11  harmony → anatomy → variable
+  scr: [22, 30],                // bars 11–15 every script
+  grid: [30, 36],               // bars 15–18 65,535
+  vert: [36, 40],               // bars 18–20 vertical
+  term: [40, 46],               // bars 20–23 install
+  fin: [46, 50],                // bars 23–25 finale
+  end3d: [50, 52.5],            // bars 25–26.25 3D reprise
+  lock: [52.5, 58.5],           // lockup
+};
+
+// thesis lines
+const TH_SIZE = 112;
+let th1, th2, fin;
+function buildType() {
+  th1 = typedLine('th1', COPY.th1, TH_SIZE, 600, 6.6, 1.0, LANG === 'zh' ? 1 : -1.5);
+  th2 = typedLine('th2', COPY.th2, TH_SIZE, 600, 8.0, 0.9, LANG === 'zh' ? 1 : -1.5);
+  fin = typedLine('fin', COPY.fin, 120, 600, 46.15, 1.0, LANG === 'zh' ? 1 : -1.5);
+}
+function layoutType() {
+  [th1, th2, fin].forEach(measureLine);
+  const mw = Math.max(th1.width, th2.width), x0 = Math.round((1920 - mw) / 2);
+  const lh = LANG === 'zh' ? 1.32 : 1.18;
+  th1.x = x0; th2.x = x0; th1.base = Math.round(540 - TH_SIZE * lh / 2 + TH_SIZE * 0.36); th2.base = Math.round(th1.base + TH_SIZE * lh);
+  fin.x = Math.round((1920 - fin.width) / 2); fin.base = 580;
+  lineKeys(th1, LANG === 'zh' ? 1 : 2); lineKeys(th2, LANG === 'zh' ? 1 : 2); lineKeys(fin, LANG === 'zh' ? 1 : 2);
+}
+
+// ── S2 thesis 6–10 ──
+function drawThesis(t) {
+  const on = t >= 6 && t < 10.05; show($('sT'), on || (t >= 46 && t < 49.6));
+  if (!on) { show(th1.el, false); show(th2.el, false); return; }
+  const out = easeInC(seg(t, 9.55, 9.9));
+  const n1 = drawLine(th1, t, -out * 40, 1 - out), n2 = drawLine(th2, t, -out * 40, 1 - out);
+  // the carry
+  const p1s = penAt(th1, 0), p1 = penAt(th1, n1), p2s = penAt(th2, 0), p2 = penAt(th2, n2);
+  let c;
+  if (t < 6.55) { const f = fieldZoom(expoOut(seg(t, 6.0, 6.5)), p1s); carry(f.x, f.y, f.w, f.h, f.r); return; }
+  if (t < 7.6) c = p1;
+  else if (t < 8.0) { const u = appleInOut(seg(t, 7.62, 7.98)), a = penAt(th1, th1.text.length); c = { ...a, x: lerp(a.x, p2s.x, u), y: lerp(a.y, p2s.y, u) }; }
+  else c = p2;
+  if (t >= 9.55) {                       // glide onto the i of the specimen
+    const tgt = specTittleScreen(10.0), u = whip(seg(t, 9.55, 10.0));
+    c = { x: lerp(c.x, tgt.x, u), y: lerp(c.y, tgt.y, u), w: lerp(c.w, tgt.w, u), h: lerp(c.h, tgt.h, u) };
+  }
+  carry(c.x, c.y, c.w, c.h, 0.5);
+}
+
+// ───────────────────────── S3/S4 specimen 10–22 ─────────────────────────
+function specWeight(t) { return t < 16.4 ? 500 : t < 17.0 ? lerp(500, 100, appleInOut(seg(t, 16.4, 17.0))) : t < 18.6 ? lerp(100, 900, appleInOut(seg(t, 17.05, 18.6))) : lerp(900, 500, appleInOut(seg(t, 18.65, 19.2))); }
+function specWidth(t) { return t < 19.3 ? 100 : t < 19.9 ? lerp(100, 80, appleInOut(seg(t, 19.3, 19.9))) : t < 20.7 ? lerp(80, 120, appleInOut(seg(t, 19.95, 20.7))) : lerp(120, 100, appleInOut(seg(t, 20.75, 21.15))); }
+function specAt(t) {                   // interpolated glyph points at (wght, wdth); structure is identical in every sample
+  const w = specWeight(t), d = specWidth(t);
+  let arr, k;
+  if (Math.abs(d - 100) > 1e-6) { arr = SPEC.wdth; k = (d - 80) / 5; } else { arr = SPEC.wght; k = (w - 100) / 50; }
+  k = clamp(k, 0, arr.length - 1.000001); const i = Math.floor(k), f = k - i, A = arr[i], B = arr[i + 1];
+  const adv = lerp(A.adv, B.adv, f);
+  const g = A.g.map((ga, gi) => { const gb = B.g[gi]; return { ch: ga.ch, tit: ga.tit, x: lerp(ga.x, gb.x, f), c: ga.c.map((ca, ci) => ca.map((p, pi) => { const q = gb.c[ci][pi]; return [lerp(p[0], q[0], f), lerp(p[1], q[1], f), p[2]]; })) }; });
+  return { adv, g, w, d };
+}
+// camera for the specimen world (world px; specimen centred at x 960 at weight 500)
+const SPK = [];
+function K(arr, t, f, s, z, e) { arr.push({ t, f, s, z, e: e || ((u) => u) }); }
+function camAt(arr, t) {
+  if (t <= arr[0].t) return arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    const a = arr[i - 1], b = arr[i];
+    if (t <= b.t) { const u = b.e(seg(t, a.t, b.t)); return { f: lerp2(a.f, b.f, u), s: lerp2(a.s, b.s, u), z: Math.exp(lerp(Math.log(a.z), Math.log(b.z), u)) }; }
+  }
+  return arr[arr.length - 1];
+}
+const toS = (c, p) => [c.s[0] + (p[0] - c.f[0]) * c.z, c.s[1] + (p[1] - c.f[1]) * c.z];
+let TIT_W;                              // tittle centre in world px at weight 500
+function specWorld(pt, x0) { return [x0 + pt[0] * SPEC_S, SPEC_BASE - pt[1] * SPEC_S]; }
+function specX0(adv) { return 960 - adv * SPEC_S / 2; }
+function tittleBox(S, cam) {
+  const g = S.g.find((q) => q.tit >= 0); const c = g.c[g.tit]; const x0 = specX0(S.adv);
+  let a = [1e9, 1e9], b = [-1e9, -1e9];
+  for (const p of c) { const s = toS(cam, specWorld([p[0] + g.x, p[1]], x0)); a = [Math.min(a[0], s[0]), Math.min(a[1], s[1])]; b = [Math.max(b[0], s[0]), Math.max(b[1], s[1])]; }
+  return { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, w: b[0] - a[0], h: b[1] - a[1] };
+}
+function specTittleScreen(t) { return tittleBox(specAt(t), camAt(SPK, t)); }
+function buildSpecCam() {
+  const S5 = SPEC.wght[8]; const x0 = specX0(S5.adv);
+  const gi = S5.g.find((q) => q.tit >= 0), tc = gi.c[gi.tit];
+  const tx = tc.reduce((a, p) => a + p[0], 0) / tc.length + gi.x, ty = tc.reduce((a, p) => a + p[1], 0) / tc.length;
+  TIT_W = specWorld([tx, ty], x0);
+  const n = S5.g.find((q) => q.ch === 'n'), dui = S5.g.find((q) => q.ch === '对');
+  const junction = [x0 + ((n.x + 560 + dui.x) / 2) * SPEC_S, SPEC_BASE - 300 * SPEC_S];
+  const C = [960, 540];
+  K(SPK, 10.0, C, C, 1);
+  K(SPK, 13.0, C, C, 1);
+  K(SPK, 13.6, junction, [960, 500], 1.6, sp(0.55, 0.14));
+  K(SPK, 14.5, junction, [960, 500], 1.62);
+  // re-express the same camera with the tittle as the anchor, so the dive and the pull-back stay locked on it
+  K(SPK, 14.5, TIT_W, [960 + (TIT_W[0] - junction[0]) * 1.62, 500 + (TIT_W[1] - junction[1]) * 1.62], 1.62);
+  K(SPK, 15.3, TIT_W, [960, 540], 16, expoIn);        // dive into the tittle
+  K(SPK, 15.45, TIT_W, [960, 540], 16);
+  K(SPK, 16.1, TIT_W, [960 + (TIT_W[0] - 960) * 0.92, 540 + (TIT_W[1] - 540) * 0.92], 0.92, expoOut);   // pull back out: the word is now its own outlines
+  K(SPK, 21.3, TIT_W, [960 + (TIT_W[0] - 960) * 0.92, 540 + (TIT_W[1] - 540) * 0.92], 0.92);
+}
+// TrueType quadratic contour → SVG path (implied on-curve midpoints between consecutive off-curve points)
+function contourD(pts, map) {
+  const n = pts.length; if (!n) return '';
+  let start = pts.findIndex((p) => p[2]);
+  const P = (i) => pts[(i + n) % n];
+  let d = '', i0;
+  if (start < 0) { const a = P(0), b = P(1); const m = map([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]); d = `M${m[0].toFixed(2)} ${m[1].toFixed(2)}`; i0 = 1; start = 0; }
+  else { const m = map(P(start)); d = `M${m[0].toFixed(2)} ${m[1].toFixed(2)}`; i0 = start + 1; }
+  let k = 0, prevOff = null;
+  for (let j = 0; j < n; j++) {
+    const p = P(i0 + j); const s = map(p);
+    if (p[2]) { if (prevOff) { d += `Q${prevOff[0].toFixed(2)} ${prevOff[1].toFixed(2)} ${s[0].toFixed(2)} ${s[1].toFixed(2)}`; prevOff = null; } else d += `L${s[0].toFixed(2)} ${s[1].toFixed(2)}`; }
+    else { if (prevOff) { const m = [(prevOff[0] + s[0]) / 2, (prevOff[1] + s[1]) / 2]; d += `Q${prevOff[0].toFixed(2)} ${prevOff[1].toFixed(2)} ${m[0].toFixed(2)} ${m[1].toFixed(2)}`; } prevOff = s; }
+  }
+  return d + 'Z';
+}
+const METRICS = () => [[860, COPY.mEmTop], [705, COPY.mCap], [532, COPY.mX], [0, COPY.mBase], [-140, COPY.mEmBot]];
+function buildMetrics() {
+  const g = $('mLines'), lb = $('mLbl');
+  METRICS().forEach(([v, name], i) => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l.setAttribute('stroke', i === 3 ? '#8F8D86' : '#4A4A4C'); l.setAttribute('stroke-width', '1.5'); g.appendChild(l);
+    const a = document.createElement('div'); a.className = 'lbl'; a.textContent = name; lb.appendChild(a);
+    const b = document.createElement('div'); b.className = 'lbl'; b.textContent = (v < 0 ? '−' + (-v) : String(v)); lb.appendChild(b);
+  });
+}
+function drawSpec(t) {
+  const on = t >= 10.0 && t < 22.0; show($('sSpec'), on); show($('mLbl'), on); show($('axisHud'), on && t >= 16.15 && t < 21.4);
+  if (!on) return;
+  const S = specAt(t), cam = camAt(SPK, t), x0 = specX0(S.adv);
+  // glyph entrance (rise from under the baseline mask, stagger 50 ms) and exit (collapse to the centre)
+  const exitU = appleInOut(seg(t, 21.25, 21.75));
+  const outline = seg(t, 14.95, 15.3);            // fill → outline + points (happens while we are inside the tittle)
+  let fill = '', outl = '', hdl = '', onP = '', offP = '', titD = '';
+  S.g.forEach((g, gi) => {
+    const rise = 1 - sp(0.55, 0)(t - 10.0 - gi * 0.05);
+    const dy = rise * 360;
+    const mk = (dy) => (p) => { let w = specWorld([p[0] + g.x, p[1]], x0); w = [w[0], w[1] + dy]; let s = toS(cam, w); if (exitU > 0) s = [lerp(s[0], 960, exitU * 0.9), lerp(s[1], 540, exitU * 0.9)]; return s; };
+    const map = mk(dy), mapT = mk(0);
+    g.c.forEach((c, ci) => {
+      if (ci === g.tit) { titD = contourD(c, mapT); return; }
+      const d = contourD(c, map);
+      fill += d; outl += d;
+      if (outline > 0) {
+        const sc = c.map(map), n = sc.length;
+        for (let k = 0; k < n; k++) {
+          const p = sc[k];
+          if (c[k][2]) onP += `M${(p[0] - 4.5).toFixed(1)} ${(p[1] - 4.5).toFixed(1)}h9v9h-9Z`;
+          else {
+            offP += `M${(p[0] + 4).toFixed(1)} ${p[1].toFixed(1)}a4 4 0 1 0 -8 0a4 4 0 1 0 8 0Z`;
+            const a = sc[(k - 1 + n) % n], b = sc[(k + 1) % n];
+            hdl += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${p[0].toFixed(1)} ${p[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+          }
+        }
+      }
+    });
+  });
+  $('specClipR').setAttribute('height', String(Math.max(0, toS(cam, [0, SPEC_BASE + 0.25 * 300])[1])));
+  $('specFill').setAttribute('d', fill); $('specFill').style.opacity = 1 - outline;
+  $('specOut').setAttribute('d', outline > 0 ? outl : ''); $('specOut').style.opacity = outline * (1 - exitU);
+  $('specHdl').setAttribute('d', hdl); $('specOn').setAttribute('d', onP); $('specOff').setAttribute('d', offP);
+  ['specHdl', 'specOn', 'specOff'].forEach((id) => { $(id).style.opacity = seg(t, 15.2, 15.6) * (1 - exitU); });
+  // metric lines (screen space through the camera)
+  const lines = $('mLines').children, lbl = $('mLbl').children;
+  METRICS().forEach(([v], i) => {
+    const y = toS(cam, [0, SPEC_BASE - v * SPEC_S])[1];
+    const u = appleOut(seg(t, 10.35 + i * 0.1, 10.95 + i * 0.1)), o = 1 - seg(t, 14.4, 14.8);
+    const xa = toS(cam, [150, 0])[0], xb = toS(cam, [1770, 0])[0];
+    const l = lines[i]; l.setAttribute('x1', xa); l.setAttribute('x2', lerp(xa, xb, u)); l.setAttribute('y1', y); l.setAttribute('y2', y); l.style.opacity = o;
+    const A = lbl[2 * i], B = lbl[2 * i + 1];
+    A.style.transform = `translate(${Math.round(xa)}px,${Math.round(y - 30)}px)`; op(A, o * seg(t, 10.6 + i * 0.1, 10.9 + i * 0.1));
+    B.style.transform = `translate(${Math.round(xb - B.offsetWidth)}px,${Math.round(y - 30)}px)`; op(B, o * seg(t, 10.6 + i * 0.1, 10.9 + i * 0.1));
+  });
+  // axis readout (data: OpenType axis tags and values)
+  const ah = $('axisHud'); ah.textContent = `wght  ${Math.round(S.w)}\nwdth  ${Math.round(S.d)}`;
+  ah.style.transform = 'translate(120px,96px)'; ah.style.lineHeight = '40px'; op(ah, seg(t, 16.15, 16.45) * (1 - seg(t, 21.1, 21.35)));
+  // the carry: the specimen's own tittle, filled with the accent (exactly one owner per frame)
+  if (t < 21.25) { $('specTit').setAttribute('d', titD); show($('specTit'), true); CAR = null; }
+  else {
+    show($('specTit'), false);
+    const b = tittleBox(S, cam), tgt = scrDot(22.0), u = whip(seg(t, 21.3, 21.95));
+    carry(lerp(b.x, tgt.x, u), lerp(b.y, tgt.y, u), lerp(b.w, tgt.w, u), lerp(b.h, tgt.h, u), 0.5);
+  }
+}
+
+// ───────────────────────── S5 every script 22–30 ─────────────────────────
+const GR_X = 470, GR_BASE = 600, GR_GAP = 210, GR_T0 = 22.0, GR_STEP = 0.25;
+const grStepT = (k) => 22.5 + (k - 1) * GR_STEP;   // word k (k ≥ 1) arrives
+let grRows = [], haoBox;
+function buildGreet() {
+  const root = $('sG');
+  GREET.forEach((g, i) => {
+    const d = document.createElement('div'); d.className = 'gr'; d.textContent = g.s; d.dir = 'auto'; d.style.unicodeBidi = 'isolate'; root.appendChild(d);
+    const l = document.createElement('div'); l.className = 'gl'; l.textContent = LANG === 'zh' ? g.zh : g.en; root.appendChild(l);
+    grRows.push({ d, l });
+  });
+}
+function grU(t) { let u = 0; for (let k = 1; k < GREET.length; k++) u += sp(0.24, 0)(t - grStepT(k)); return u; }
+const grDive = (t) => expoIn(seg(t, 29.15, 30.0));
+function grCam(t) {   // zoom about 好 into a 900 px em at screen centre
+  const z = Math.exp(lerp(0, Math.log(6), grDive(t)));
+  const s = lerp2([haoBox.x, haoBox.y], [960, 540], appleInOut(seg(t, 29.15, 30.0)));
+  return { f: [haoBox.x, haoBox.y], s, z };
+}
+function scrDot(t) { const k = grPulse(t); const s = 18 * (1 + 0.28 * k); return { x: GR_X - 64, y: GR_BASE - 150 * 0.27, w: s, h: s }; }
+function grPulse(t) { let k = 0; for (let i = 1; i < GREET.length; i++) { const d = t - grStepT(i); if (d >= 0 && d < 0.25) k = Math.max(k, 1 - expoOut(d / 0.22)); } return k; }
+function drawGreet(t) {
+  const on = t >= 22.0 && t < 30.05; show($('sG'), on); if (!on) return;
+  const u = grU(t), cam = grCam(t);
+  grRows.forEach((r, i) => {
+    const dist = i - u, vis = Math.abs(dist) < 3.2 && t >= GR_T0 + (i === 0 ? 0 : grStepT(i) - 0.3 - 22);
+    show(r.d, vis); show(r.l, vis); if (!vis) return;
+    const ad = Math.abs(dist), sc = 1 - 0.2 * Math.min(1, ad);
+    const enter = i === 0 ? sp(0.5, 0)(t - 22.0) : 1;
+    const y = GR_BASE + dist * GR_GAP + (1 - enter) * 120;
+    const p = toS(cam, [GR_X, y]);
+    const z = cam.z * sc;
+    r.d.style.fontSize = r2(150 * z) + 'px';
+    r.d.style.transform = `translate(${r2(p[0])}px,${r2(p[1] - 150 * 0.86 * z)}px)`;
+    const below = clamp((860 - p[1]) / 140);
+    op(r.d, (1 - Math.min(1, ad) * 0.72) * Math.min(1, 1 - (ad - 2.2)) * (i === 0 ? enter : 1) * below);
+    r.d.style.color = ad < 0.5 ? PAPER : '#8F8D86';
+    const lp = toS(cam, [GR_X + 4, y + 62]);
+    r.l.style.fontSize = r2(24 * cam.z) + 'px'; r.l.style.transform = `translate(${r2(lp[0])}px,${r2(lp[1] - 20 * cam.z)}px)`;
+    op(r.l, clamp(1 - ad * 2.2) * (i === 0 ? enter : 1) * (1 - grDive(t) * 3));
+  });
+  // carry: the bullet beside the current line; during the dive it slides into 好's cell corner (where the grid's marker sits)
+  if (t < 29.15) { const d = scrDot(t); carry(d.x, d.y, d.w, d.h, 0.5, 1); }
+  else { const d = scrDot(29.15), g = gridDot(30.0), v = expoIn(seg(t, 29.15, 30.0)); carry(lerp(d.x, g.x, v), lerp(d.y, g.y, v), lerp(d.w, g.w, v), lerp(d.h, g.h, v), 0.5); }
+}
+
+// ───────────────────────── S6 every glyph 30–36 ─────────────────────────
+const CELL = 32, NC = 256, ATLAS = NC * CELL;
+const cellC = (gid) => [(gid % NC) * CELL + CELL / 2, Math.floor(gid / NC) * CELL + CELL / 2];
+const HAO = cellC(18778), LAST = cellC(65534), EMPTY = cellC(65535);
+const GK = [];
+function buildGrid() {
+  const z1 = 900 / ATLAS, FX = 1110, FY = 520;
+  K(GK, 30.0, HAO, [960, 540], 900 / 24);
+  K(GK, 33.2, HAO, [FX + (HAO[0] - ATLAS / 2) * z1, FY + (HAO[1] - ATLAS / 2) * z1], z1, MO.cubicBezier(0.4, 0, 0.12, 1));
+  K(GK, 34.0, HAO, [FX + (HAO[0] - ATLAS / 2) * z1, FY + (HAO[1] - ATLAS / 2) * z1], z1);
+  K(GK, 34.9, [LAST[0] - 48, LAST[1]], [880, 560], 6, whip);
+  K(GK, 36.0, [LAST[0] - 48, LAST[1]], [880, 560], 6.15);
+  const w = $('gWorld');
+  const add = (src, x, y, ww, hh, id) => { const im = document.createElement('img'); im.dataset.src = src; im.id = id; im.wr = [x, y, ww, hh]; Object.assign(im.style, { position: 'absolute', left: '0', top: '0', display: 'none' }); w.appendChild(im); return im; };
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) add(`atlas/L0_r${r}_c${c}.png`, c * 1024, r * 1024, 1024, 1024, `t${r}_${c}`);
+  add('atlas/L1.png', 0, 0, ATLAS, ATLAS, 'L1'); add('atlas/L2.png', 0, 0, ATLAS, ATLAS, 'L2'); add('atlas/L3.png', 0, 0, ATLAS, ATLAS, 'L3');
+  add('atlas/hi_hao.png', 82 * CELL, 69 * CELL, 17 * CELL, 9 * CELL, 'hiH'); add('atlas/hi_end.png', 238 * CELL, 248 * CELL, 18 * CELL, 8 * CELL, 'hiE');
+  $('hiH').style.backgroundColor = '#111214'; $('hiE').style.backgroundColor = '#111214';   // opaque backing: the coarse atlas must not show through
+  const hao = document.createElement('div'); hao.id = 'haoV'; hao.textContent = '好';
+  Object.assign(hao.style, { position: 'absolute', left: '0', top: '0', fontSize: '24px', lineHeight: '1', fontVariationSettings: "'wght' 500", whiteSpace: 'pre' }); w.appendChild(hao);
+  const cell = document.createElement('div'); cell.id = 'emptyCell';
+  cell.wr = [EMPTY[0] - 16, EMPTY[1] - 16, 32, 32];
+  Object.assign(cell.style, { position: 'absolute', left: '0', top: '0', boxSizing: 'border-box', border: '2px dashed #8F8D86' }); w.appendChild(cell);
+  const gl = $('gLbl');
+  ['gCount', 'gLastL', 'gNoneL'].forEach((id) => { const d = document.createElement('div'); d.id = id; d.className = id === 'gCount' ? 'hud' : 'lbl'; d.style.position = 'absolute'; gl.appendChild(d); });
+}
+function gridDot(t) { const c = camAt(GK, t); const tgtCell = t < 34.0 ? HAO : LAST; const u = t < 34.0 ? 0 : whip(seg(t, 34.0, 34.9));
+  const cc = lerp2(HAO, LAST, u); const s = clamp(0.16 * CELL * c.z, 7, 22); const p = toS(c, [cc[0] - CELL / 2, cc[1] - CELL / 2]);
+  return { x: p[0] + s * 0.5 + 3, y: p[1] + s * 0.5 + 3, w: s, h: s }; }
+function drawGrid(t) {
+  const on = t >= 30.0 && t < 36.05; show($('sGrid'), on); if (!on) return;
+  const c = camAt(GK, t), z = c.z, w = $('gWorld');
+  const place = (el) => { const [x, y, ww, hh] = el.wr; const p = toS(c, [x, y]); el.style.left = r2(p[0]) + 'px'; el.style.top = r2(p[1]) + 'px'; el.style.width = r2(ww * z) + 'px'; el.style.height = r2(hh * z) + 'px'; };
+  [...w.querySelectorAll('img')].forEach(place); place($('emptyCell'));
+  const out = 1 - seg(t, 35.6, 36.0);
+  op(w, out);
+  // visible world rect
+  const x0 = c.f[0] - c.s[0] / z, y0 = c.f[1] - c.s[1] / z, x1 = x0 + 1920 / z, y1 = y0 + 1080 / z;
+  const useL0 = z >= 0.42, lv = z >= 0.42 ? 0 : z >= 0.2 ? 1 : z >= 0.11 ? 2 : 3;
+  for (let r = 0; r < 8; r++) for (let cc = 0; cc < 8; cc++) {
+    const im = $(`t${r}_${cc}`), vis = useL0 && cc * 1024 < x1 && (cc + 1) * 1024 > x0 && r * 1024 < y1 && (r + 1) * 1024 > y0;
+    if (vis) setSrc(im, im.dataset.src); show(im, vis); im.style.imageRendering = z > 1.5 ? 'auto' : 'auto';
+  }
+  for (const L of [1, 2, 3]) { const im = $('L' + L); const vis = lv === L; if (vis) setSrc(im, im.dataset.src); show(im, vis); }
+  const hiH = $('hiH'), hv = z > 1.1 && t < 33.2; if (hv) setSrc(hiH, hiH.dataset.src); show(hiH, hv); op(hiH, clamp((z - 1.1) / 0.6));
+  const hiE = $('hiE'), ev = t > 34.0; if (ev) setSrc(hiE, hiE.dataset.src); show(hiE, ev); op(hiE, clamp((z - 1.1) / 0.8));
+  // the vector 好 (same placement rule as the atlas: em box centred in the cell, advance centred)
+  const hao = $('haoV'); const hz = z > 5; show(hao, hz);
+  if (hz) { const p = toS(c, [HAO[0] - 12, HAO[1] - 16 + 25 - 20.64]); hao.style.fontSize = r2(24 * z) + 'px'; hao.style.transform = `translate(${r2(p[0])}px,${r2(p[1])}px)`; op(hao, clamp((z - 5) / 6)); }
+  op($('emptyCell'), seg(t, 34.4, 34.9));
+  // labels (data: glyph IDs) and the counter
+  const cnt = $('gCount'), cu = expoOut(seg(t, 30.4, 33.2));
+  cnt.textContent = fmt(lerp(1, 65535, cu)); cnt.style.fontSize = '30px'; cnt.style.color = PAPER;
+  cnt.style.transform = 'translate(120px,96px)'; op(cnt, seg(t, 30.4, 30.7) * (1 - seg(t, 33.9, 34.2)));
+  const ll = $('gLastL'), nl = $('gNoneL');
+  const pl = toS(c, [LAST[0] - 16, LAST[1] - 16]), pn = toS(c, [EMPTY[0] - 16, EMPTY[1] + 16]);
+  ll.textContent = 'GID 65,534 · ' + COPY.gLast; nl.textContent = COPY.gNone;
+  const pe = toS(c, [EMPTY[0] + 16, EMPTY[1]]);
+  ll.style.transform = `translate(${Math.round(pe[0] + 36)}px,${Math.round(pe[1] - 34)}px)`; nl.style.transform = `translate(${Math.round(pe[0] + 36)}px,${Math.round(pe[1] + 6)}px)`;
+  op(ll, seg(t, 34.7, 35.0) * out); op(nl, seg(t, 34.85, 35.15) * out);
+  // carry: the cell marker
+  if (t < 35.6) { const d = gridDot(t); carry(d.x, d.y, d.w, d.h, 0.5); }
+  else { const d = gridDot(35.6), v = vertDot(36.05), u = whip(seg(t, 35.6, 36.05)); carry(lerp(d.x, v.x, u), lerp(d.y, v.y, u), lerp(d.w, v.w, u), lerp(d.h, v.h, u), 0.5); }
+}
+
+// ───────────────────────── S7 vertical 36–40 ─────────────────────────
+const VT = '「天地玄黄，宇宙洪荒。」';
+const PUNCT = new Set([...'「」，。']);
+let VH = [], VV = [], vch = [];
+function buildVert() {
+  const h = $('vtH'), v = $('vtV');
+  for (const ch of [...VT]) { const a = document.createElement('span'); a.textContent = ch; h.appendChild(a); const b = document.createElement('span'); b.textContent = ch; v.appendChild(b); }
+  [...VT].forEach((ch) => {
+    const d = document.createElement('div'); d.className = 'abs';
+    const a = document.createElement('div'); a.className = 'vc'; a.textContent = ch; d.appendChild(a);
+    let b = null; if (PUNCT.has(ch)) { b = document.createElement('div'); b.className = 'vc vv'; b.textContent = ch; d.appendChild(b); }
+    $('vChars').appendChild(d); vch.push({ d, a, b, ch });
+  });
+}
+function layoutVert() {
+  const h = $('vtH'), v = $('vtV');
+  const hw = h.getBoundingClientRect().width; h.style.transform = `translate(${Math.round(960 - hw / 2)}px,${540 - 40}px)`;
+  const vh = v.getBoundingClientRect().height; v.style.transform = `translate(${960 - 40}px,${Math.round(530 - vh / 2)}px)`;
+  const rect = (s) => s.getBoundingClientRect();
+  VH = [...h.children].map((s) => { const r = rect(s); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+  VV = [...v.children].map((s) => { const r = rect(s); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+  vch.forEach((c) => { if (c.b) { const r = c.b.getBoundingClientRect(); c.bw = r.width; c.bh = r.height; } const r = c.a.getBoundingClientRect(); c.aw = r.width; c.ah = r.height; });
+}
+const vN = (t) => Math.floor(clamp((t - 36.05) / 0.7) * VT.length + 1e-6);
+function vertDot(t) {
+  if (t < 36.95) { const n = vN(t); const r = n > 0 ? VH[n - 1] : VH[0]; const x = n > 0 ? r.x + r.w + 80 * 0.12 : r.x - 80 * 0.12; return { x, y: VH[0].y + 80 * (0.86 - 0.685) + 2, w: 11, h: 11 }; }
+  const a = vertDot(36.94), last = VV[VV.length - 1], b = { x: last.x + last.w / 2, y: last.y + last.h + 28, w: 11, h: 11 }, u = appleInOut(seg(t, 37.4, 38.0));
+  return { x: lerp(a.x, b.x, u), y: lerp(a.y, b.y, u), w: 11, h: 11 };
+}
+function drawVert(t) {
+  const on = t >= 36.0 && t < 40.05; show($('sV'), on); if (!on) return;
+  const n = vN(t), out = easeInC(seg(t, 39.45, 39.85));
+  vch.forEach((c, i) => {
+    const u = appleInOut(seg(t, 37.0 + i * 0.035, 37.6 + i * 0.035));
+    const H = VH[i], V = VV[i];
+    const cx = lerp(H.x + H.w / 2, V.x + V.w / 2, u), cy = lerp(H.y + H.h / 2, V.y + V.h / 2, u) - out * 40;
+    c.d.style.transform = `translate(${r2(cx)}px,${r2(cy)}px)`;
+    c.a.style.transform = `translate(${r2(-c.aw / 2)}px,${r2(-c.ah / 2)}px)`;
+    const xf = c.b ? seg(u, 0.35, 0.65) : 0;
+    op(c.a, (i < n ? 1 : 0) * (1 - xf) * (1 - out));
+    if (c.b) { c.b.style.transform = `translate(${r2(-c.bw / 2)}px,${r2(-c.bh / 2)}px)`; op(c.b, (i < n ? 1 : 0) * xf * (1 - out)); }
+  });
+  if (t < 39.45) { const d = vertDot(t); carry(d.x, d.y, d.w, d.h, 0.5); }
+  else { const d = vertDot(39.45), p = termCaret(40.0), u = whip(seg(t, 39.45, 40.0)); carry(lerp(d.x, p.x, u), lerp(d.y, p.y, u), lerp(d.w, 14, u), lerp(d.h, 14, u), lerp(0.5, 0.2, u)); }
+}
+
+// ───────────────────────── S8 terminal 40–46 (real session) ─────────────────────────
+const TL_X = 380, TL_B0 = 262, TL_LH = 38;
+let TROWS = [];   // {el, kind:'cmd'|'out', t0, dur, spans, right}
+const TPLAN = [[40.5, 0.8], [41.55, 0.4], [42.15, 0.7], [43.75, 0.55]];
+function buildTerm() {
+  $('ttitle').textContent = COPY.tTitle;
+  const root = $('tlines'); let ci = 0, oi = 0, outT = 0, row = 0;
+  for (const line of TERM) {
+    const d = document.createElement('div'); d.className = 'tl'; root.appendChild(d);
+    if (line.startsWith('$ ')) {
+      const pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = '$ '; d.appendChild(pr);
+      for (const ch of [...line.slice(2)]) { const s = document.createElement('span'); s.textContent = ch; d.appendChild(s); }
+      const [t0, dur] = TPLAN[ci++]; TROWS.push({ el: d, kind: 'cmd', t0, dur, row, n: [...line.slice(2)].length }); outT = t0 + dur + 0.15; oi = 0;
+    } else {
+      d.classList.add('o'); d.textContent = line || ' ';
+      TROWS.push({ el: d, kind: 'out', t0: outT + oi * 0.0625, row }); oi++;
+    }
+    row++;
+  }
+  const last = document.createElement('div'); last.className = 'tl'; last.innerHTML = '<span class="pr">$ </span>'; root.appendChild(last);
+  TROWS.push({ el: last, kind: 'prompt', t0: 44.55, row });
+}
+function layoutTerm() {
+  TROWS.forEach((r) => {
+    r.el.style.top = (TL_B0 + r.row * TL_LH - 26 * 0.86) + 'px';
+    const r0 = r.el.getBoundingClientRect(); r.right = [...r.el.children].map((s) => s.getBoundingClientRect().right - r0.left);
+  });
+}
+const TCAM = [];
+function buildTermCam() { const C = [960, 540]; K(TCAM, 40.0, C, C, 1); K(TCAM, 44.45, C, C, 1); K(TCAM, 45.05, [960, 740], [960, 600], 1.22, sp(0.55, 0.14)); K(TCAM, 46.0, [960, 740], [960, 600], 1.23); }
+function termCaret(t) {        // block cursor, in un-cammed screen px
+  let row = 0, x = TL_X;
+  const cmds = TROWS.filter((r) => r.kind !== 'out');
+  for (const r of TROWS) {
+    if (r.kind === 'cmd' && t >= r.t0 - 0.3) { const n = Math.floor(clamp((t - r.t0) / r.dur) * r.n + 1e-6); row = r.row; x = TL_X + r.right[n]; if (t >= r.t0 + r.dur + 0.08) { row = r.row + 1; x = TL_X; } }
+    if (r.kind === 'out' && t >= r.t0) { row = r.row + 1; x = TL_X; }
+    if (r.kind === 'prompt' && t >= r.t0) { row = r.row; x = TL_X + r.right[0]; }
+  }
+  if (t < 40.5) { const r = TROWS[0]; row = r.row; x = TL_X + r.right[0]; }
+  return { x: x + 8, y: TL_B0 + row * TL_LH - 9, w: 14, h: 30 };
+}
+function drawTerm(t) {
+  const on = t >= 40.0 && t < 46.1; show($('sTerm'), on); if (!on) return;
+  const cam = camAt(TCAM, t);
+  const ex = appleInOut(seg(t, 45.55, 45.95));
+  const z = cam.z * (1 - 0.06 * ex);
+  $('term').style.transform = `translate(${cam.s[0]}px,${cam.s[1]}px) scale(${z}) translate(${-cam.f[0]}px,${-cam.f[1]}px)`;
+  op($('term'), 1 - ex);
+  const p0 = termCaret(40.0), u = expoOut(seg(t, 40.0, 40.45));
+  // the window opens out of the cursor
+  const L = lerp(p0.x - 340, 0, u), Tt = lerp(p0.y - 150, 0, u), R = lerp(1580 - p0.x, 0, u), B = lerp(870 - p0.y, 0, u);
+  $('twin').style.clipPath = `inset(${Tt}px ${R}px ${B}px ${L}px round 18px)`;
+  op($('tlines'), seg(t, 40.25, 40.45));
+  TROWS.forEach((r) => {
+    if (r.kind === 'cmd') { const n = Math.floor(clamp((t - r.t0) / r.dur) * r.n + 1e-6); [...r.el.children].forEach((s, i) => { s.style.opacity = i === 0 ? 1 : (i <= n ? 1 : 0); }); op(r.el, t >= r.t0 - 0.3 || r === TROWS[0] ? 1 : 0); }
+    else op(r.el, t >= r.t0 ? 1 : 0);
+  });
+  const c = termCaret(t); const s = toS(cam, [c.x + 7, c.y]);
+  const sw = s[0] - (s[0] - 960) * 0.06 * ex, sh = s[1] - (s[1] - 540) * 0.06 * ex;
+  if (t < 40.45) { const k = expoOut(seg(t, 40.0, 40.4)); carry(s[0], s[1], 14, lerp(14, 30, k), lerp(0.5, 0.18, k)); }
+  else if (t < 45.55) carry(s[0], s[1], 14 * z, 30 * z, 0.18);
+  else { const p = penAt(fin, 0), u2 = whip(seg(t, 45.55, 46.1)); carry(lerp(sw, p.x, u2), lerp(sh, p.y, u2), lerp(14 * z, p.w, u2), lerp(30 * z, p.h, u2), lerp(0.18, 0.5, u2)); }
+}
+
+// ───────────────────────── S9 finale 46–50 ─────────────────────────
+function drawFin(t) {
+  const on = t >= 46.0 && t < 50.0; if (!on) { show(fin.el, false); return; }
+  show($('sT'), true);
+  const o = 1 - seg(t, 48.85, 49.2);
+  const n = drawLine(fin, t, 0, o);
+  if (t < 46.1) return;                  // the terminal still owns the carry
+  const p = penAt(fin, n);
+  if (t < 48.85) { carry(p.x, p.y, p.w, p.h, 0.5); return; }
+  const f = fieldZoom(1 - expoIn(seg(t, 48.85, 49.6)), p); carry(f.x, f.y, f.w, f.h, f.r);
+}
+
+// ───────────────────────── 3D frames + lockup ─────────────────────────
+const LK = { ppu: 0.132, sx: 960, sy: 520, W1: 800, W2: 300, OY: 352 };
+function buildLock() {
+  const s1 = LOCK.samples[(LK.W1 - 100) / 25], s2 = LOCK.samples[(LK.W2 - 100) / 25];
+  const TW = s1.adv1 + s2.space + s2.adv2; LK.TW = TW;
+  const shift = (d, dx) => { let k = 0; return d.replace(/-?\d+\.?\d*/g, (v) => (k++ % 2 === 0 ? (+v + dx).toFixed(1) : v)); };
+  let d = s1.run1.map((g) => g.d).join('');
+  d += s2.run2.map((g) => shift(g.d, s1.adv1 + s2.space)).join('');
+  const tf = `translate(${LK.sx - TW / 2 * LK.ppu} ${LK.sy + LK.OY * LK.ppu}) scale(${LK.ppu} ${-LK.ppu})`;
+  $('lockP').setAttribute('d', d); $('lockG').setAttribute('transform', tf);
+  $('lockT').setAttribute('d', shift(s2.tittle, s1.adv1 + s2.space)); $('lockT').setAttribute('transform', tf);
+  LK.tf = tf;
+  const sub = $('lockSub');
+  const u = document.createElement('div'); u.textContent = 'github.com/Juwan-Hwang/PingFang-SF';
+  Object.assign(u.style, { position: 'absolute', left: '0', width: '1920px', textAlign: 'center', top: (650 - 28 * 0.86) + 'px', fontSize: '28px', lineHeight: '1', fontVariationSettings: "'wght' 450", color: '#D9D7D0', letterSpacing: '0.3px' });
+  const l = document.createElement('div'); l.textContent = COPY.lic;
+  Object.assign(l.style, { position: 'absolute', left: '0', width: '1920px', textAlign: 'center', top: (698 - 22 * 0.86) + 'px', fontSize: '22px', lineHeight: '1', fontVariationSettings: "'wght' 450", color: '#8F8D86', letterSpacing: LANG === 'zh' ? '2px' : '0.4px' });
+  sub.appendChild(u); sub.appendChild(l); LK.u = u; LK.l = l;
+}
+window.__handoff = () => ({ ppu: LK.ppu, sx: LK.sx, sy: LK.sy });
+function draw3D(t) {
+  const img = $('f3d');
+  if (t < 6.0) { show(img, true); setSrc(img, `frames/open/${String(Math.min(179, Math.floor(t * FPS + 1e-6))).padStart(4, '0')}.jpg`); op(img, 1); return; }
+  if (t >= 50.0 && t < 52.5 + 1e-6) { show(img, true); setSrc(img, `frames/end/${String(Math.min(74, Math.floor((t - 50) * FPS + 1e-6))).padStart(4, '0')}.jpg`); op(img, 1); return; }
+  show(img, false);
+}
+function drawLock(t) {
+  const on = t >= 52.25; show($('lockV'), on); show($('lockSub'), on); if (!on) return;
+  op($('lockV'), seg(t, 52.25, 52.5));
+  // the tittle's sign-off: one hop, then home
+  const h = t < 53.0 ? 0 : t < 53.17 ? expoOut(seg(t, 53.0, 53.17)) : 1 - sp(0.42, 0.35)(t - 53.17);
+  $('lockT').setAttribute('transform', `translate(0 ${(-26 * h).toFixed(2)}) ` + LK.tf);
+  const a = appleOut(seg(t, 53.55, 54.25)), b = appleOut(seg(t, 53.75, 54.45));
+  LK.u.style.transform = `translateY(${Math.round(16 * (1 - a))}px)`; op(LK.u, a);
+  LK.l.style.transform = `translateY(${Math.round(16 * (1 - b))}px)`; op(LK.l, b);
+}
+
+// ───────────────────────── seek ─────────────────────────
+window.__meta = { dur: DUR, fps: FPS, bpm: BPM };
+window.__seek = async (t) => {
+  CAR = null;
+  draw3D(t); drawThesis(t); drawSpec(t); drawGreet(t); drawGrid(t); drawVert(t); drawTerm(t); drawFin(t); drawLock(t);
+  drawCaps(t); drawCarry();
+  op($('fade'), seg(t, DUR - 0.7, DUR - 0.05));
+  if (Q.has('hud')) $('hud').textContent = t.toFixed(3);
+  const p = pending.splice(0); await Promise.all(p); return true;
+};
+// screen-space travel of the camera / carry across [t0, t1] (the renderer's motion-blur budget)
+function probePts(t) {
+  const pts = [];
+  if (CAR) pts.push([CAR.x, CAR.y], [CAR.x + CAR.w / 2, CAR.y + CAR.h / 2]);
+  const add = (arr, w0) => { const c = camAt(arr, t); for (const p of w0) pts.push(toS(c, p)); };
+  if (t >= 10 && t < 22) { const c0 = camAt(SPK, t); add(SPK, [[300, 300], [1620, 780], TIT_W]); }
+  if (t >= 30 && t < 36) add(GK, [HAO, LAST, [4096, 4096]]);
+  if (t >= 40 && t < 46) add(TCAM, [[400, 300], [1500, 800]]);
+  if (t >= 22 && t < 30) { const c = grCam(t); pts.push(toS(c, [GR_X, GR_BASE - GR_GAP]), toS(c, [1500, 900])); const u = grU(t); pts.push([0, u * GR_GAP]); }
+  if (t >= 36.9 && t < 38.2) { const u = appleInOut(seg(t, 37.0, 37.9)); pts.push([lerp(VH[0].x, VV[0].x, u), lerp(VH[0].y, VV[0].y, u)], [lerp(VH[10].x, VV[10].x, u), lerp(VH[10].y, VV[10].y, u)]); }
+  return pts;
+}
+window.__motion = (t0, t1) => {
+  // carries are evaluated by drawing; cheap enough at 5 samples
+  const samples = [];
+  for (let k = 0; k <= 4; k++) { const t = lerp(t0, t1, k / 4); CAR = null; drawThesis(t); drawSpec(t); drawGreet(t); drawGrid(t); drawVert(t); drawTerm(t); drawFin(t); samples.push(probePts(t)); }
+  let m = 0;
+  for (let k = 1; k < samples.length; k++) { const a = samples[k - 1], b = samples[k]; for (let i = 0; i < Math.min(a.length, b.length); i++) m = Math.max(m, Math.hypot(b[i][0] - a[i][0], b[i][1] - a[i][1])); }
+  return m * 4 > 4000 ? 4000 : m * 4 / 1;   // per-step travel × steps ≈ travel over the shutter
+};
+
+// ───────────────────────── events (sound is generated from the same tables) ─────────────────────────
+window.__events = () => {
+  const E = [];
+  const hit = (t, extra = {}) => E.push({ t, kind: 'hit', ...extra });
+  [2.0, 6.0, 10.0, 16.0, 22.0, 30.0, 36.0, 40.0, 46.0].forEach((t) => hit(t));
+  hit(50.0, { big: true });
+  E.push({ t: 52.5, kind: 'land' });
+  [[9.55, 'carry'], [14.5, 'dive'], [21.3, 'carry'], [29.15, 'dive'], [35.6, 'carry'], [39.45, 'carry'], [45.55, 'carry'], [48.85, 'swell']].forEach(([t, k]) => E.push({ t, kind: k }));
+  [[6.0, 'close'], [16.4, 'morph'], [19.3, 'morph'], [30.0, 'pull'], [34.0, 'whip'], [37.0, 'flow'], [13.0, 'push'], [44.45, 'push']].forEach(([t, k]) => E.push({ t, kind: k }));
+  for (let i = 0; i < 5; i++) E.push({ t: 10.35 + i * 0.1, kind: 'tick', pan: -0.4 + i * 0.2 });
+  for (let k = 1; k < GREET.length; k++) E.push({ t: grStepT(k), kind: 'tap', k });
+  E.push(...keyEvents);
+  const vn = [...VT].length; for (let i = 0; i < vn; i++) E.push({ t: 36.05 + (i + 0.5) * 0.7 / vn, kind: 'key' });
+  TROWS.forEach((r) => {
+    if (r.kind === 'cmd') { for (let i = 0; i < r.n; i += 2) E.push({ t: r.t0 + (i + 0.5) * r.dur / r.n, kind: 'tkey' }); E.push({ t: r.t0 + r.dur + 0.08, kind: 'enter' }); }
+    if (r.kind === 'out') E.push({ t: r.t0, kind: 'out' });
+  });
+  E.push({ t: 40.0, kind: 'open' }, { t: 53.0, kind: 'pop' }, { t: 53.55, kind: 'rise' });
+  return E.sort((a, b) => a.t - b.t);
+};
+
+// ───────────────────────── build + ready ─────────────────────────
+caption('harm', 11.0, 14.45, COPY.harmH, COPY.harmS);
+caption('var', 16.45, 21.2, COPY.varH, COPY.varS);
+caption('scr', 23.0, 29.1, COPY.scrH, COPY.scrS);
+caption('grid', 32.4, 35.55, COPY.gH, COPY.gS);
+caption('vert', 37.3, 39.45, COPY.vH, COPY.vS);
+caption('inst', 41.0, 45.5, COPY.iH, COPY.iS);
+window.__ready = (async () => {
+  [SPEC, LOCK, GREET] = await Promise.all(['data/spec.json', 'data/lockup.json', 'data/greet.json'].map((u) => fetch(u).then((r) => r.json())));
+  TERM = (await (await fetch('data/term.txt')).text()).replace(/\n+$/, '').split('\n');
+  GREET = [...GREET.filter((g) => g.s !== '你好'), GREET.find((g) => g.s === '你好')];   // end on 你好: the dive goes into 好
+  buildType(); buildMetrics(); buildGreet(); buildGrid(); buildVert(); buildTerm(); buildLock(); buildCaps();
+  for (const w of [100, 300, 450, 500, 600, 800, 900]) await document.fonts.load(`${w} 40px "PFSF"`);
+  await document.fonts.load('500 40px "PFSF"', '你好苹方SF');
+  await document.fonts.ready;
+  show($('sV'), true); show($('sTerm'), true);
+  layoutType(); layoutVert(); layoutTerm(); buildSpecCam(); buildTermCam();
+  show($('sV'), false); show($('sTerm'), false);
+  // 好's centre in the greeting reel at rest (last row, current)
+  { const r = grRows[grRows.length - 1].d; r.style.transform = 'none'; show($('sG'), true); show(r, true); const b = r.getBoundingClientRect(); show($('sG'), false);
+    const w2 = r.firstChild; const range = document.createRange(); range.setStart(w2, 1); range.setEnd(w2, 2); const rb = range.getBoundingClientRect();
+    haoBox = { x: GR_X + (rb.left - b.left) + rb.width / 2, y: GR_BASE - 150 * 0.86 + (rb.top - b.top) + rb.height / 2 }; }
+  await window.__seek(+(Q.get('t') || 0));
+  return true;
+})();
+</script>
+</body></html>

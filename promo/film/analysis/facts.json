@@ -1,0 +1,295 @@
+{
+ "numGlyphs": 65535,
+ "codepoints": 56497,
+ "upem": 1000,
+ "axes": [
+  [
+   "wght",
+   100.0,
+   500.0,
+   900.0
+  ],
+  [
+   "wdth",
+   80.0,
+   100.0,
+   120.0
+  ]
+ ],
+ "instances": [
+  [
+   "Regular",
+   {
+    "wght": 400.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Medium",
+   {
+    "wght": 500.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Semibold",
+   {
+    "wght": 600.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Bold",
+   {
+    "wght": 700.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Heavy",
+   {
+    "wght": 800.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Black",
+   {
+    "wght": 900.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Ultralight",
+   {
+    "wght": 100.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Thin",
+   {
+    "wght": 200.0,
+    "wdth": 100.0
+   }
+  ],
+  [
+   "Light",
+   {
+    "wght": 300.0,
+    "wdth": 100.0
+   }
+  ]
+ ],
+ "os2": {
+  "capH": 860,
+  "xH": 600,
+  "asc": 860,
+  "desc": -140,
+  "gap": 400,
+  "winA": 1060,
+  "winD": 340,
+  "fsType": 4
+ },
+ "hhea": [
+  1060,
+  -340,
+  0
+ ],
+ "GSUB_lookups": 747,
+ "GSUB_features": [
+  "aalt",
+  "abvf",
+  "abvs",
+  "akhn",
+  "blwf",
+  "blws",
+  "c2sc",
+  "calt",
+  "case",
+  "ccmp",
+  "cjct",
+  "clig",
+  "cv01",
+  "cv02",
+  "cv03",
+  "cv04",
+  "cv05",
+  "cv06",
+  "cv07",
+  "cv08",
+  "cv11",
+  "cv12",
+  "cv13",
+  "dlig",
+  "dnom",
+  "fin2",
+  "fin3",
+  "fina",
+  "frac",
+  "fwid",
+  "half",
+  "haln",
+  "hwid",
+  "init",
+  "isol",
+  "liga",
+  "locl",
+  "med2",
+  "medi",
+  "nalt",
+  "nukt",
+  "numr",
+  "ordn",
+  "pnum",
+  "pref",
+  "pres",
+  "pstf",
+  "psts",
+  "pwid",
+  "rclt",
+  "rkrf",
+  "rlig",
+  "rphf",
+  "rtla",
+  "rtlm",
+  "salt",
+  "smcp",
+  "ss01",
+  "ss02",
+  "ss03",
+  "ss04",
+  "ss06",
+  "ss07",
+  "ss09",
+  "ss12",
+  "ss13",
+  "ss14",
+  "stch",
+  "subs",
+  "sups",
+  "tnum",
+  "vatu",
+  "vert"
+ ],
+ "GSUB_scripts": [
+  "DFLT",
+  "arab",
+  "armn",
+  "bng2",
+  "copt",
+  "cyrl",
+  "dev2",
+  "deva",
+  "gjr2",
+  "grek",
+  "gujr",
+  "gur2",
+  "guru",
+  "hani",
+  "khmr",
+  "knd2",
+  "lao ",
+  "latn",
+  "lisu",
+  "mlm2",
+  "mong",
+  "mym2",
+  "ory2",
+  "sinh",
+  "sund",
+  "syrc",
+  "tale",
+  "talu",
+  "tfng",
+  "thaa",
+  "thai",
+  "tibt",
+  "tml2"
+ ],
+ "GPOS_lookups": 158,
+ "GPOS_features": [
+  "abvm",
+  "blwm",
+  "curs",
+  "dist",
+  "kern",
+  "mark",
+  "mkmk",
+  "rlig",
+  "ss09"
+ ],
+ "GPOS_scripts": [
+  "DFLT",
+  "arab",
+  "armn",
+  "bng2",
+  "copt",
+  "cyrl",
+  "dev2",
+  "deva",
+  "ethi",
+  "gjr2",
+  "grek",
+  "gujr",
+  "gur2",
+  "guru",
+  "khmr",
+  "knd2",
+  "lao ",
+  "latn",
+  "mlm2",
+  "mong",
+  "mym2",
+  "ory2",
+  "sinh",
+  "sund",
+  "syrc",
+  "talu",
+  "tfng",
+  "thaa",
+  "thai",
+  "tibt",
+  "tml2"
+ ],
+ "tables": [
+  "BASE",
+  "DSIG",
+  "GDEF",
+  "GPOS",
+  "GSUB",
+  "GlyphOrder",
+  "HVAR",
+  "OS/2",
+  "STAT",
+  "VORG",
+  "avar",
+  "cmap",
+  "fvar",
+  "glyf",
+  "gvar",
+  "head",
+  "hhea",
+  "hmtx",
+  "loca",
+  "maxp",
+  "name",
+  "post",
+  "vhea",
+  "vmtx"
+ ],
+ "name": {
+  "1": "PingFang SF",
+  "2": "Medium",
+  "3": "PingFangSF-Medium;1.200;Juwan-Hwang",
+  "4": "PingFang SF Medium",
+  "5": "Version 1.200; PingFang SF v1.2.0, merged from PingFang UI 21.4d1e1, SF Pro, MiSans, Source Han Sans, TH-Hak, Pretendard, Plangothic, SF India, SF Armenian, SF Georgian, SF Arabic, New York, SF Mono, Kefa, Apple Symbols, Segoe UI Symbol, STIX Two, Noto",
+  "6": "PingFangSF-Medium",
+  "16": null,
+  "17": null
+ },
+ "cjk_basic": 20992,
+ "extA": 6592,
+ "hangul_syll": 3266,
+ "ascii_printable": 95
+}

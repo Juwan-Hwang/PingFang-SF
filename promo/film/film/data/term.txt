@@ -1,0 +1,15 @@
+$ cp PingFang-SF-Medium.ttf ~/.local/share/fonts/
+$ fc-cache -f
+$ fc-list "PingFang SF" style
+
+:style=Semibold
+:style=Heavy
+:style=Ultralight
+:style=Thin
+:style=Regular
+:style=Medium
+:style=Light
+:style=Black
+:style=Bold
+$ fc-match "苹方SF"
+PingFang-SF-Medium.ttf: "PingFang SF" "Regular"
