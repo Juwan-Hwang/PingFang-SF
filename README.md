@@ -1,6 +1,8 @@
 # 苹方SF · PingFang SF
 
-https://github.com/user-attachments/assets/974059d4-8a8f-40e8-be96-6605e92650d0
+
+https://github.com/user-attachments/assets/ffc8044a-b8ae-462b-90fd-bd57496cab01
+
 
 
 ![PingFang SF](docs/images/hero.png)
